@@ -66,7 +66,8 @@ function update_ball()
 		
 		ball.y=pad.y-ball.sz
 		ball.spy=-ball.spy
-		sfx(1)
+		
+		sfx(1)	
 	end
 end
 -->8
@@ -87,8 +88,11 @@ function draw_paddle()
 end
 
 function update_paddle()
-	if (btn(➡️)) pad.x+=pad.spd
-	if (btn(⬅️)) pad.x-=pad.spd
+	if (btn(➡️)) pad.spd=5
+	if (btn(⬅️)) pad.spd=-5
+	
+	pad.spd=lerp(pad.spd,0,0.23)
+	pad.x+=pad.spd
 	
 	pad.x=clamp(pad.x,1,126-pad.w)
 end
@@ -119,6 +123,10 @@ end
 
 function print_time()
 	print("tsec:"..tsec,4,4,7)
+end
+
+function lerp(start,finish,t)
+	return (1-t)*start+t*finish
 end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
