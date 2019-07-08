@@ -1,0 +1,98 @@
+pico-8 cartridge // http://www.pico-8.com
+version 18
+__lua__
+-- screen bg
+scrbg=3
+
+-- paddle
+padx=52
+pady=122
+padw=24
+padh=4
+padcolor=15
+
+-- ball
+ballx=64
+bally=64
+ballsz=2
+ballspx=5
+ballspy=-3
+ballcolor=15
+
+function move_ball()
+	ballx+=ballspx
+	if ballx < ballsz or ballx > 127-ballsz then
+		ballspx=-ballspx
+	 ballx=clamp(ballx,ballsz,127-ballsz)		
+	 sfx(0)
+	end
+
+	
+	bally+=ballspy
+	if bally < ballsz then
+		ballspy=-ballspy
+	 bally=clamp(bally,0,127-ballsz)
+	 sfx(0)
+	end
+end
+
+function move_paddle()
+	if btn(➡️) then
+	  padx+=3
+	end  
+	if btn(⬅️) then
+			padx-=3
+	end
+	padx=clamp(padx, 1, 126-padw)
+end
+
+function draw_paddle()
+	rectfill(padx, pady, padx+padw, pady+padh, padcolor)
+end
+
+function _update()
+	move_paddle()
+	move_ball()
+	bounce_paddle()
+end
+
+function _draw()
+	-- clear the screen
+	rectfill(0,0,127,127,scrbg)
+	
+	-- draw paddle
+	draw_paddle()
+	
+	-- draw ball
+	circfill(ballx, bally, ballsz, ballcolor)
+end
+
+function bounce_paddle()
+	if ballx >= padx and ballx <= padx+padw then
+		if bally >= pady and bally <= pady+padh then
+			ballspy=-ballspy
+			bally=pady
+			sfx(0)
+		end
+	end
+end
+-->8
+function clamp(value, lo, hi)
+	if value < lo then
+		return lo
+	end
+	if value > hi then
+		return hi
+	end
+	return value
+end
+
+__gfx__
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00700700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00077000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00077000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00700700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+__sfx__
+000100002b05000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
