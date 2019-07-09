@@ -2,6 +2,7 @@ pico-8 cartridge // http://www.pico-8.com
 version 18
 __lua__
 -- main
+
 function _init()
 	draw_bg()
 	make_ball()
@@ -91,7 +92,7 @@ function update_paddle()
 	if (btn(➡️)) pad.spd=5
 	if (btn(⬅️)) pad.spd=-5
 	
-	pad.spd=lerp(pad.spd,0,0.23)
+	pad.spd=lerp(pad.spd,0,0.21)
 	pad.x+=pad.spd
 	
 	pad.x=clamp(pad.x,1,126-pad.w)
@@ -99,12 +100,8 @@ end
 -->8
 -- utils
 function clamp(value,lo,hi)
-	if value < lo then
-		return lo
-	end
-	if value > hi then
-		return hi
-	end
+	if (value < lo) return lo
+	if (value > hi) return hi
 	return value
 end
 
@@ -126,7 +123,10 @@ function print_time()
 end
 
 function lerp(start,finish,t)
-	return (1-t)*start+t*finish
+ if (t<=0) return start
+ if (t>=1) return finish
+ local value = (1-t)*start+t*finish
+ if (abs(finish-value) > 0.01) return value else return finish
 end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
