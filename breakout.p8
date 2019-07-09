@@ -20,6 +20,7 @@ function _draw()
 	draw_bg()
 	draw_ball()
 	draw_paddle()
+	print("sz:"..ball.sz,4,10,7)
 	print_time()
 end
 
@@ -30,8 +31,8 @@ ball={}
 function make_ball()
 	ball.x=35
 	ball.y=30
-	ball.spx=-4
-	ball.spy=3
+	ball.spx=-2
+	ball.spy=1
 	ball.sz=2
 	ball.col=10
 end
@@ -57,7 +58,7 @@ function update_ball()
 	end
 	
 	-- pulsate
-	ball.sz=3+sin(frame/8)	
+	ball.sz=3+flr(sin(tsec/4))
 	
 	-- paddle collision detection
 	if ball.x>pad.x-ball.sz and 
