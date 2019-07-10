@@ -2,10 +2,22 @@ pico-8 cartridge // http://www.pico-8.com
 version 18
 __lua__
 -- test
+srcx=40
+srcy=127
+
 box={}
-ray={}
+ball={}
+
 horiz=""
 vert=""
+
+function make_ball()
+	ball.x=srcx
+	ball.y=srcy
+	ball.dx=0
+	ball.dy=-2
+	ball.sz=2
+end
 
 function make_box()
 	box.x=32
@@ -14,72 +26,67 @@ function make_box()
 	box.h=16
 end
 
-function make_ray()
-	ray.x=20
-	ray.y=20
-	ray.dx=2
-	ray.dy=2
-end
-
 function draw_box()
 	rect(box.x,box.y,box.x+box.w,box.y+box.h,7)
 end
 
-function draw_ray()
-	local px,py=ray.x,ray.y
-	circfill(px,py,1,8)
-	while in_screen(px,py) do
-		pset(px,py,8)
-		
-		if in_bounds(px,box.x,box.x+box.w) and
-			in_bounds(py,box.y,box.y+box.h) then
-			return
-		end	
-		
-		px+=ray.dx
-		py+=ray.dy
-	end
+function draw_ball()
+	local x,y=srcx,srcy
+	circfill(x,y,1,14)
+	repeat
+		pset(x,y,8)
+		x+=ball.dx
+		y+=ball.dy
+	until (x==ball.x and y==ball.y)
+	circfill(x,y,2,8)	
 end
 
-function print_stats(h,v)
-	print("horiz:"..h,4,4,7)
-	print(" vert:"..v,4,10,7)	
+function print_stats()
+ --rectfill(0,0,20,20,0)
+	print("horiz:"..horiz,4,4,7)
+	print(" vert:"..vert,4,10,7)	
 end
 
 function _init()
 	make_box()
-	make_ray()
+	make_ball()
 end
 
 function _update()
-	if (btn(⬅️)) ray.x-=1
-	if (btn(➡️)) ray.x+=1	
-	if (btn(⬆️)) ray.y-=1
-	if (btn(⬇️)) ray.y+=1
+	if (btn(⬅️)) srcx-=1
+	if (btn(➡️)) srcx+=1	
+	if (btn(⬆️)) srcy-=1
+	if (btn(⬇️)) srcy+=1
 
-	ray.x=clamp(ray.x,0,127)
-	ray.y=clamp(ray.y,0,127)
+	srcx=clamp(srcx,0,127)
+	srcy=clamp(srcy,0,127)
+
+	local x,y,ssz=ball.x,ball.y,ball.sz
+
+	if not check_collision(x,y,ssz,box.x,box.y,box.w,box.h) then
+	 ball.x+=ball.dx
+	 ball.y+=ball.dy		
+	end
 
  horiz,vert="none","none"
 	
 	if is_horiz_impact(
-		ray.x,ray.y,ray.dx,ray.dy,
-		box.x,box.y,box.w,box.h) then
+		x,y,ssz,box.x,box.y,box.w,box.h) then
 		horiz="collision!"
 	end
 	
 	if is_vert_impact(
-		ray.x,ray.y,ray.dx,ray.dy,
-		box.x,box.y,box.w,box.h) then
+  x,y,ssz,box.x,box.y,box.w,box.h) then
 		vert="collision!"
 	end	
+	
 end
 
 function _draw()
  cls()
  draw_box()
- draw_ray()
-	print_stats(horiz,vert)
+ draw_ball()
+	print_stats()
 end
 -->8
 --utils
@@ -99,50 +106,27 @@ function in_screen(x,y)
 end
 -->8
 -- collisions
-function check_collision(sx,sy,dx,dy,tx,ty,tw,th)
+function check_collision(sx,sy,ssz,tx,ty,tw,th)
 	local x,y=sx,sy
-	while in_screen(x,y) do
-		if (x>=tx and x<=tx+tw and y>=ty and y<=ty+th) then
-			return true	
-		end
-		x+=dx
-		y+=dy
-	end
-	return false
+	return x+ssz>=tx and x-ssz<=tx+tw and y+ssz>=ty and y-ssz<=ty+th
 end
 
-function is_horiz_impact(sx,sy,dx,dy,tx,ty,tw,th)
-	local x,y=sx,sy
-	while in_screen(x,y) do
-		if (x>=tx and x<=tx+tw and y>=ty and y<=ty+th) then
-			if abs(y-ty)<=abs(dy) or
-			 abs(y-(ty+th))<=abs(dy) then
-				return true
-			else
-				return false
-			end					
-		end
-		x+=dx
-		y+=dy
+function is_horiz_impact(sx,sy,ssz,tx,ty,tw,th)	
+	if check_collision(sx,sy,ssz,tx,ty,tw,th) then
+		local x,y=sx,sy		
+		return abs(y+ssz-ty)<=ssz or abs(y-ssz-(ty+th))<=ssz
+	else
+		return false
 	end
-	return false
 end
 
-function is_vert_impact(sx,sy,dx,dy,tx,ty,tw,th)
-	local x,y=sx,sy
-	while in_screen(x,y) do
-		if (x>=tx and x<=tx+tw and y>=ty and y<=ty+th) then
-			if abs(x-tx)<=abs(dx) or
-			 abs(x-(tx+tw))<=abs(dx) then
-				return true
-			else
-				return false
-			end			
-		end
-		x+=dx
-		y+=dy
+function is_vert_impact(sx,sy,ssz,tx,ty,tw,th)
+	if check_collision(sx,sy,ssz,tx,ty,tw,th) then
+		local x,y=sx,sy		
+		return abs(x+ssz-tx)<=ssz or abs(x-ssz-(tx+tw))<=ssz
+	else
+		return false
 	end
-	return false
 end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
