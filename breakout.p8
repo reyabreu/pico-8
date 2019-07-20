@@ -58,7 +58,7 @@ function update_ball()
 	end
 	
 	-- pulsate
-	ball.sz=3+flr(sin(tsec/4))
+	ball.sz=3-flr(sin(tsec/3.5))
 	
 	-- paddle collision detection
 	if ball.x>pad.x-ball.sz and 
