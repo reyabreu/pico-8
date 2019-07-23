@@ -31,8 +31,8 @@ ball={}
 function make_ball()
 	ball.x=35
 	ball.y=30
-	ball.spx=-2
-	ball.spy=1
+	ball.spx=-4
+	ball.spy=4
 	ball.sz=2
 	ball.col=10
 end
@@ -42,7 +42,9 @@ function draw_ball()
 end
 
 function update_ball()
-	-- bouncing
+	-- bouncinf off walls
+	
+	--side walls
 	ball.x+=ball.spx
 	if ball.x<ball.sz or ball.x>127-ball.sz then
 		ball.x=clamp(ball.x,ball.sz,127-ball.sz)
@@ -50,6 +52,7 @@ function update_ball()
 		sfx(0)
 	end
 	
+	-- top wall
 	ball.y+=ball.spy
 	if ball.y<ball.sz or ball.y>127-ball.sz then
 		ball.y=clamp(ball.y,ball.sz,127-ball.sz)
@@ -61,13 +64,39 @@ function update_ball()
 	ball.sz=3+flr(sin(tsec/4))
 	
 	-- paddle collision detection
-	if ball.x>pad.x-ball.sz and 
-		ball.x<pad.x+ball.sz+pad.w and
-		ball.y>pad.y-ball.sz and 
-		ball.y<pad.y+ball.sz+pad.h then
+	local sx,sy,ssz=ball.x,ball.y,ball.sz
+	local tx,ty,tw,th=pad.x,pad.y,pad.w,pad.h
+
+	-- if pad collision
+	if check_collision(sx,sy,ssz,tx,ty,tw,th) then	
+		local is_horiz=is_horiz_impact(sx,sy,ssz,tx,ty,tw,th)
+		local is_vert=is_vert_impact(sx,sy,ssz,tx,ty,tw,th)
 		
-		ball.y=pad.y-ball.sz
-		ball.spy=-ball.spy
+		-- on corner
+		if is_horiz and is_vert then
+			is_horiz=1+flr(rnd(10))>5
+			is_vert=not is_horiz
+		end
+	
+	 -- on horiz surface
+		if is_horiz then
+			if ball.y<pad.y then
+				ball.y=pad.y-ball.sz
+			else
+				ball.y=pad.y+pad.h+ball.sz
+			end
+			ball.spy=-ball.spy
+		end
+
+	 -- on vert surface
+		if is_vert then
+			if ball.x<pad.x then
+				ball.x=pad.x-ball.sz
+			else
+				ball.x=pad.x+pad.w+ball.sz
+			end
+			ball.spx=-ball.spx
+		end
 		
 		sfx(1)	
 	end
@@ -78,7 +107,7 @@ pad={}
 
 function make_paddle()
 	pad.x=52
-	pad.y=120
+	pad.y=100
 	pad.w=20
 	pad.h=4
 	pad.spd=3
@@ -101,8 +130,8 @@ end
 -->8
 -- utils
 function clamp(value,lo,hi)
-	if (value < lo) return lo
-	if (value > hi) return hi
+	if (value<lo) return lo
+	if (value>hi) return hi
 	return value
 end
 
@@ -128,6 +157,30 @@ function lerp(start,finish,t)
  if (t>=1) return finish
  local value = (1-t)*start+t*finish
  if (abs(finish-value) > 0.01) return value else return finish
+end
+-->8
+-- collisions
+function check_collision(sx,sy,ssz,tx,ty,tw,th)
+	local x,y=sx,sy
+	return x+ssz>=tx and x-ssz<=tx+tw and y+ssz>=ty and y-ssz<=ty+th
+end
+
+function is_horiz_impact(sx,sy,ssz,tx,ty,tw,th)	
+	if check_collision(sx,sy,ssz,tx,ty,tw,th) then
+		local x,y=sx,sy		
+		return abs(y+ssz-ty)<=ssz or abs(y-ssz-(ty+th))<=ssz
+	else
+		return false
+	end
+end
+
+function is_vert_impact(sx,sy,ssz,tx,ty,tw,th)
+	if check_collision(sx,sy,ssz,tx,ty,tw,th) then
+		local x,y=sx,sy		
+		return abs(x+ssz-tx)<=ssz or abs(x-ssz-(tx+tw))<=ssz
+	else
+		return false
+	end
 end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
