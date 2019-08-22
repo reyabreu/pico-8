@@ -6,15 +6,20 @@ __lua__
 function _init()
 	game_over=false
 	win=false
+	end_burst=false
 	g=0.025 --gravity
 	make_ground()
 	make_player()
 end
 
 function _update()
-	if not (game_over) then
+	if not game_over then
 		move_player()
 		check_landing()
+	elseif not win then
+		if #burst==0 and not end_burst then
+			make_explosions(p.x+3,p.y+3,10)
+		end
 	end
 end
 
@@ -38,13 +43,16 @@ function make_player()
 end
 
 function draw_player()
-	spr(p.sprite,p.x,p.y)
-	if (game_over) then
-		if (win) then
+	if game_over then
+		if win then
+			spr(p.sprite,p.x,p.y)
 			spr(4,p.x,p.y-8) -- raise flag
 		else
-			spr(5,p.x,p.y)
+			--spr(5,p.x,p.y)
+			if (not end_burst) draw_explosions()
 		end
+	else
+		spr(p.sprite,p.x,p.y)
 	end
 end
 
@@ -68,12 +76,12 @@ function thrust()
 end
 
 function stay_on_screen()
-	if (p.x<0) then
+	if p.x<0 then
 		p.x=0
-	elseif (p.x>119) then
+	elseif p.x>119 then
 		p.x=119 p.dx=0
 	end
-	if (p.y<0) then
+	if p.y<0 then
 		p.y=0 p.dy=0
 	end
 end
@@ -127,10 +135,34 @@ function draw_ground()
 	end
 	spr(pad.sprite,pad.x,pad.y,2,1)
 end
+
+burst={}
+function make_explosions(x,y,n)
+	for i=1,n do
+		local explosion = {}
+		explosion.x=x+(rnd(2)-1)*10
+		explosion.y=y+(rnd(2)-1)*10
+		explosion.r=4
+		explosion.c=10
+		add(burst, explosion)
+	end
+end
+
+function draw_explosions()
+	for e in all(burst) do
+		circfill(e.x,e.y,e.r,e.c)
+		e.r-=1
+		if (e.r<4) e.c=9
+		if (e.r<2) e.c=8
+		if (e.r<=0) del(burst, e)
+		if (#burst==0) end_burst=true
+	end
+end
+
 -->8
 --game ctl
 function check_landing()
-	l_x=flr(p.x) 		--left side of ship
+	l_x=flr(p.x)   --left side of ship
 	r_x=flr(p.x+7) --right side of ship
 	b_y=flr(p.y+7) --bottom of ship
 	
@@ -155,7 +187,7 @@ function end_game(won)
 	game_over=true
 	win=won
 	
-	if (win) then
+	if win then
 		sfx(1)
 	else
 		sfx(2)
@@ -303,4 +335,4 @@ __label__
 __sfx__
 000600000e63000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000c00001f0701f0301d0701c03018070180302407024030000001707020070200300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-000400003e67039660336602c65027640206401b64015630106300d6200a620076200561003610026100361003610056100761007600056000360002600026000160000600000000000000000000000000000000
+000400003d630376203161029620226201d62017620126100c6100861004610026100161001610016100161001600026000360007600056000360002600026000160000600000000000000000000000000000000
