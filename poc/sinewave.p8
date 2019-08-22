@@ -1,64 +1,47 @@
 pico-8 cartridge // http://www.pico-8.com
 version 18
 __lua__
--- circle mover
--- by reynaldo
+
+local values={}
 
 function _init()
-	make_player()
+ 	cls(1)
+
+	-- 0..1 is a half circle sweep (0..pi)
+	for x=0,128 do
+		pset(x,64+46*sin(x/128),10)
+		pset(x,64-46*cos(x/128),15)
+	end
+
+	line(0,64,127,64,7)
+	pset(33,65,7)	
+	pset(64,65,7)
+	pset(96,65,7)	
+	pset(127,65,7)	
+	print("pi/2",60,68,7)
+	print("pi",120,68,7)
+	line(0,0,0,127,7)
 end
 
+-- pico-8 circle sweep is 
+-- from 0 to 1
 function _update()
-	cls()
-	move_player()
+	-- sin is inverted (clockwise)
+	values.sx0=sin(0)
+	values.sx1=sin(-0.25) -- pi/2
+	values.sx2=sin(-0.5)  -- pi
+	
+	-- cos is not inverted (anticlockwise)
+	values.cx0=cos(0)
+	values.cx1=cos(0.25) -- pi/2
+	values.cx2=cos(0.5)  -- pi
 end
 
 function _draw()
-	draw_player()
-	log_player()
-end
--->8
---player
-p={} --global
-
-function make_player()
-	p.x=64	p.y=64
-	p.speed=5
-	p.radius=2
-	p.last={p.x,p.y}
-end
-
-function move_player()
- local dx=0
- local dy=0
- local k=1
- 
-	if (btn(⬅️)) dx-=1  
-	if (btn(➡️)) dx+=1
-	if (btn(⬆️)) dy-=1
-	if (btn(⬇️)) dy+=1  
-	
-	if (dx~=0 and dy~=0) k=0.707
-	
-	p.last[0]=p.x	p.last[1]=p.y
-	
-	p.x=clamp(p.x+dx*flr(k*p.speed),p.radius,127-p.radius)
-	p.y=clamp(p.y+dy*flr(k*p.speed),p.radius,127-p.radius)
-end
-
-function draw_player()
-	circfill(p.x,p.y,p.radius,7)
-end
--->8
---utilities
-function clamp(value,vmin,vmax)
-	if (value>vmax) return vmax
-	if (value<vmin) return vmin
-	return value
-end
-
-function log_player()
-	print("x,y:"..p.x.." "..p.y,4,4,9)
+	local sx0,sx1,sx2=values.sx0,values.sx1,values.sx2
+	print("sin, 0:"..sx0..",1:"..sx1..",2:"..sx2,4,4,10)
+ 	local cx0,cx1,cx2=values.cx0,values.cx1,values.cx2 	
+	print("cos, 0:"..cx0..",1:"..cx1..",2:"..cx2,4,10,15)	
 end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

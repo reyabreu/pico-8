@@ -1,46 +1,43 @@
 pico-8 cartridge // http://www.pico-8.com
 version 18
 __lua__
-values={}
-function _init()
- rectfill(0,0,127,127,1)
+lt={}
 
-	-- 0..1 is a full circle sweep
-	for x=0,127 do
-		pset(x,64+46*sin(x/127),10)
-		pset(x,64-46*cos(x/127),15)
-	end
-
-	line(0,64,127,64,7)
-	pset(33,65,7)	
-	pset(64,65,7)
-	pset(96,65,7)	
-	pset(127,65,7)	
-	print("pi/2",60,68,7)
-	print("pi",120,68,7)
-	line(0,0,0,127,7)
+function rndb(lo,hi)
+	return flr(lo+rnd(hi-lo+1))
 end
 
--- pico-8 circle sweep is 
--- from 0 to 1
-function _update()
-	-- sin is inverted (clockwise)
-	values.sx0=sin(0)
-	values.sx1=sin(-0.25)
-	values.sx2=sin(-0.5)
-	
-	-- cos is not inverted (anticlockwise)
-	values.cx0=cos(0)
-	values.cx1=cos(0.25)
-	values.cx2=cos(0.5)
+function nline(prev)
+	return mid(20,rndb(prev-3,prev+3),40)
+end
+
+function _init()
+	cls(1)
+	-- set clip area
+	clip(20,20,81,81)
+
+	-- fill lines array
+ 	lt[1]=rndb(25,35)
+	for i=2,64 do -- count up
+		add(lt,nline(lt[i-1]))
+	end
 end
 
 function _draw()
- local sx0,sx1,sx2=values.sx0,values.sx1,values.sx2
-	print("sin, 0:"..sx0..",1:"..sx1..",2:"..sx2,4,4,10)
- local cx0,cx1,cx2=values.cx0,values.cx1,values.cx2 	
-	print("cos, 0:"..cx0..",1:"..cx1..",2:"..cx2,4,10,15)	
+	-- draw border of clip area
+	rect(20,20,100,100,10)
+	
+	-- draw lines
+	i=1
+	for x=0,127,2 do
+		line(x,80-lt[i],x,80,rndb(7,9))
+		i+=1
+	end
+	-- set pixels in clip bounds
+	pset(20,20,12)
+	pset(100,100,12)
 end
+
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

@@ -23,27 +23,26 @@ function move_ball()
 	ballx+=ballspx
 	if ballx < ballsz or ballx > 127-ballsz then
 		ballspx=-ballspx
-	 ballx=clamp(ballx,ballsz,127-ballsz)		
+	 ballx=mid(ballsz,ballx,127-ballsz)		
 	 sfx(0)
 	end
 
-	
 	bally+=ballspy
 	if bally < ballsz then
 		ballspy=-ballspy
-	 bally=clamp(bally,0,127-ballsz)
+	 bally=mid(0,bally,127-ballsz)
 	 sfx(0)
 	end
 end
 
 function move_paddle()
 	if btn(➡️) then
-	  padx+=3
+		padx+=3
 	end  
 	if btn(⬅️) then
-			padx-=3
+		padx-=3
 	end
-	padx=clamp(padx, 1, 126-padw)
+	padx=mid(1,padx,126-padw)
 end
 
 function draw_paddle()
@@ -58,7 +57,7 @@ end
 
 function _draw()
 	-- clear the screen
-	rectfill(0,0,127,127,scrbg)
+	cls(scrbg)
 	
 	-- draw paddle
 	draw_paddle()
@@ -75,16 +74,6 @@ function bounce_paddle()
 			sfx(0)
 		end
 	end
-end
--->8
-function clamp(value, lo, hi)
-	if value < lo then
-		return lo
-	end
-	if value > hi then
-		return hi
-	end
-	return value
 end
 
 __gfx__

@@ -1,36 +1,48 @@
 pico-8 cartridge // http://www.pico-8.com
 version 18
 __lua__
-lt={}
-
-function rndb(l,h)
-	return l+flr(rnd(h-l))
-end
-
-function nline(pr)
-	return mid(20,rndb(pr-3,pr+3),40)
-end
+-- circle mover
+-- by reynaldo
+local player
 
 function _init()
- cls(1)
-	-- fill lines array
- lt[1]=rndb(25,35)
-	for i=2,64 do -- count up
-			add(lt,nline(lt[i-1]))
-	end
-	-- set clip area
-	clip(20,20,81,81)
-	-- draw lines
-	i=1
-	for x=0,127,2 do
-		line(x,80-lt[i],x,80,8)
-		i+=1
-	end
-	rect(20,20,100,100,10)
-	--set pixel in clip bounds
-	pset(20,20,12)
-	pset(100,100,12)
+	player={
+		x=64,
+		y=64,
+		speed=5,
+		radius=3,
+		color=10,
+		update=function(self)
+			local dx=0
+			local dy=0
+			local k=1
+		 
+			if (btn(⬅️)) dx-=1  
+			if (btn(➡️)) dx+=1
+			if (btn(⬆️)) dy-=1
+			if (btn(⬇️)) dy+=1  
+			
+			if (dx~=0 and dy~=0) k=0.707
+			
+			self.x=mid(self.radius,self.x+dx*flr(k*self.speed),127-self.radius)
+			self.y=mid(self.radius,self.y+dy*flr(k*self.speed),127-self.radius)
+		end,
+		draw=function(self)
+			circfill(self.x,self.y,self.radius,self.color)
+		end
+	}
 end
+
+function _update()
+	cls(1)
+	player:update()
+end
+
+function _draw()
+	player:draw()
+	print("x,y:"..player.x.." "..player.y,4,4,9)
+end
+
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
