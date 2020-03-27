@@ -7,11 +7,14 @@ end
 
 function _update()
 	mv_gun_left()
+ if (btn(❎)) fire_gun()
+	update_ball()
 end
 
 function _draw()
  cls(1)
  draw_gun()
+ draw_ball()
 end
 -->8
 --utils
@@ -36,6 +39,7 @@ end
 
 function fire_gun()
 	make_ball()
+	ball.shot=true
 end
 
 function update_gun()
@@ -71,9 +75,6 @@ function draw_gun()
 	circ(gun.x,gun.y,3,gun.col)
 	line(gun.x,gun.y,gun.mx,gun.my,gun.col)
 end
-
-function fire()
-end
 -->8
 --ball
 ball={}
@@ -81,8 +82,10 @@ function make_ball()
 	ball.x=gun.mx
 	ball.y=gun.my
 	ball.r=3
-	ball.dy=flr(gun.my-gun.cy)
-	ball.dx=flr(gun.mx-gun.cx)
+	
+	ball.dy=gun.my-gun.cy
+	ball.dx=gun.mx-gun.cx
+	
 	ball.shot=false
 end
 
@@ -96,6 +99,7 @@ function update_ball()
 end
 
 function draw_ball()
+	circfill(ball.x,ball.y,ball.r,7)
 end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

@@ -47,7 +47,7 @@ function update_ball()
 	--side walls
 	ball.x+=ball.spx
 	if ball.x<ball.sz or ball.x>127-ball.sz then
-		ball.x=clamp(ball.x,ball.sz,127-ball.sz)
+		ball.x=mid(ball.sz,ball.x,127-ball.sz)
 		ball.spx=-ball.spx
 		sfx(0)
 	end
@@ -55,7 +55,7 @@ function update_ball()
 	-- top wall
 	ball.y+=ball.spy
 	if ball.y<ball.sz or ball.y>127-ball.sz then
-		ball.y=clamp(ball.y,ball.sz,127-ball.sz)
+		ball.y=mid(ball.sz,ball.y,127-ball.sz)
 		ball.spy=-ball.spy
 		sfx(0)
 	end
@@ -125,16 +125,10 @@ function update_paddle()
 	pad.spd=lerp(pad.spd,0,0.21)
 	pad.x+=pad.spd
 	
-	pad.x=clamp(pad.x,1,126-pad.w)
+	pad.x=mid(1,pad.x,126-pad.w)
 end
 -->8
 -- utils
-function clamp(value,lo,hi)
-	if (value<lo) return lo
-	if (value>hi) return hi
-	return value
-end
-
 function draw_bg()
 	rectfill(0,0,127,127,1)
 end

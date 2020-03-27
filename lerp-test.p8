@@ -2,44 +2,45 @@ pico-8 cartridge // http://www.pico-8.com
 version 18
 __lua__
 -- main routines
+
+r1max=40
+r1min=10
+
+r2max=20
+r2min=5
+
+
 function _init()
-	create_gun()
+ cls(15)
+ r1=r1min
+ limit1=r1max 
+ r2=r2min
+ limit2=r2max  
+	circfill(64,64,r,7)
 end
 
 function _update()
+		r1=lerp(r1,limit1,0.05)
+  if (r1max-r1<2) limit1=r1min
+  if (r1-r1min<2) limit1=r1max		
+  
+		r2=lerp(r2,limit2,0.05)
+  if (r2max-r2<2) limit2=r2min
+  if (r2-r2min<2) limit2=r2max		  
 end
 
 function _draw()
-	cls(1)
-	draw_gun()
+	cls(15)
+	circfill(64,64,r1,7)
+	circfill(64,64,r2,15)
 end
+
 -->8
--- circle gun
-gun={}
+-- utils
 
-function create_gun()
-	gun.cx=64
-	gun.cy=64
-	gun.col=7
-	
-	gun.sz=50
-	gun.a=0 -- 0..360 degree anticlockwise
-end
-
-function draw_gun()
-	circ(gun.cx,gun.cy,gun.sz,gun.col)
-	
-	local p1=p2c(gun.sz,gun.a)		
-	circfill(p1.x,p1.y,3,8)
-	local p2=p2c(gun.sz-5,gun.a)
-	line(p1.x,p1.y,p2.x,p2.y,15)
-end
-
-function p2c(r,a)
-	local point={}
-	point.x=gun.cx+r*cos(a/360+0.25)
- point.y=gun.cy+r*sin(a/360+0.25)
- return point
+-- linear interpolation
+function lerp(start,finish,t)
+	return start*(1-t)+finish*t
 end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
