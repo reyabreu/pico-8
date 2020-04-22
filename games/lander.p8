@@ -21,13 +21,24 @@ function _update()
 			make_explosions(p.x+3,p.y+3,10)
 		end
 	end
+	if game_over then
+		if not cor then
+			cor=cocreate(oscillate)			
+		elseif cor and costatus(cor) != 'dead' then
+			coresume(cor)			
+		end
+	end	
 end
 
 function _draw()
 	cls()
 	draw_stars()
 	draw_ground()
-	draw_player()
+	if game_over then
+		draw_banner()
+	else
+		draw_player()
+	end
 end
 -->8
 --player
@@ -191,6 +202,22 @@ function end_game(won)
 		sfx(1)
 	else
 		sfx(2)
+	end
+end
+-->8
+-- co routines
+cor=nil
+banner={}
+
+function draw_banner()
+	print("Game Over",banner.x,banner.y,7)
+end
+
+function oscillate()
+	banner.x=30
+	for i=1,10 do
+		banner.y=60+60*SIN(i/10)
+		yield()
 	end
 end
 __gfx__
