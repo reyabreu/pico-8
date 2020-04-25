@@ -2,32 +2,32 @@ pico-8 cartridge // http://www.pico-8.com
 version 18
 __lua__
 -- test
-srcx=40
-srcy=127
+srcx=52
+srcy=120
 
-box={}
-ball={}
-
-horiz=""
-vert=""
-
-function make_ball()
-	ball.x=srcx
-	ball.y=srcy
-	ball.dx=0
-	ball.dy=-2
-	ball.sz=2
+function make_ball(x,y)
+	local b={}
+	b.x=x
+	b.y=y
+	b.dx=0
+	b.dy=-2
+	b.sz=3
+	return b
 end
 
-function make_box()
-	box.x=32
-	box.y=46
-	box.w=64
-	box.h=16
+function make_box(x,y,w,h)
+	local bx={}
+	bx.x=x --32
+	bx.y=y --46
+	bx.w=w --64
+	bx.h=h --16
+	bx.c=7
+	bx.draw=draw_box
+	return bx
 end
 
-function draw_box()
-	rect(box.x,box.y,box.x+box.w,box.y+box.h,7)
+function draw_box(bx)
+	rect(bx.x,bx.y,bx.x+bx.w,bx.y+bx.h,bx.c)
 end
 
 function draw_ball()
@@ -48,18 +48,18 @@ function print_stats()
 end
 
 function _init()
-	make_box()
-	make_ball()
+	box=make_box(32,46,64,16)
+	ball=make_ball(srcx,srcy)
 end
 
 function _update()
-	if (btn(⬅️)) srcx-=1
-	if (btn(➡️)) srcx+=1	
-	if (btn(⬆️)) srcy-=1
-	if (btn(⬇️)) srcy+=1
+	if (btn(0)) srcx-=1
+	if (btn(1)) srcx+=1	
+	if (btn(2)) srcy-=1
+	if (btn(3)) srcy+=1
 
-	srcx=clamp(srcx,0,127)
-	srcy=clamp(srcy,0,127)
+	srcx=mid(0,srcx,127)
+	srcy=mid(0,srcy,127)
 
 	local x,y,ssz=ball.x,ball.y,ball.sz
 
@@ -83,17 +83,24 @@ function _update()
 end
 
 function _draw()
- cls()
- draw_box()
- draw_ball()
+	cls()
+	box:draw()
+	draw_ball()
 	print_stats()
 end
 -->8
 --utils
-function clamp(v,vmin,vmax)
-	if (v<vmin) return vmin
-	if (v>vmax) return vmax
-	return v
+function has_collision(ball,box)
+	local cx,cy=false,false
+	for x=ball.x-ball.sz,ball.x+ball.sz do
+		cy
+		cx=in_bounds(x,box.x,box.x+box.w)
+		if (cx) break
+	end
+	for x=ball.x-ball.sz,ball.x+ball.sz do
+		cx=in_bounds(x,box.x,box.x+box.w)
+		if (cx) break
+	end
 end
 
 function in_bounds(v,vmin,vmax)
@@ -101,8 +108,11 @@ function in_bounds(v,vmin,vmax)
 end
 
 function in_screen(x,y)
-	return in_bounds(x,0,127) and 
-		in_bounds(y,0,127)
+	return in_bounds(x,0,127) and in_bounds(y,0,127)
+end
+
+function lerp(vstart,vfinish,factor)
+	return mid(vstart,vstart*(1-factor)+factor*vfinish,vfinish)
 end
 -->8
 -- collisions

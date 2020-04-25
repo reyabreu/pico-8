@@ -1,46 +1,17 @@
 pico-8 cartridge // http://www.pico-8.com
-version 18
+version 20
 __lua__
--- main routines
-
-r1max=40
-r1min=10
-
-r2max=20
-r2min=5
-
-
-function _init()
- cls(15)
- r1=r1min
- limit1=r1max 
- r2=r2min
- limit2=r2max  
+cls(1)srand(t())p=pget
+::_::
+circ(64,64,32,10)
+for l=0,129 do
+	 local x,y=flr(rnd(l)),flr(rnd(l))
+		if (p(x,y)~=1) then
+			y+=1
+			if (y<128 and p(x,y)==1) pset(x,y,flr(rnd(13)+2))
+		end
 end
-
-function _update()
-		r1=lerp(r1,limit1,0.05)
-  if (r1max-r1<1) limit1=r1min
-  if (r1-r1min<1) limit1=r1max		
-  
-		r2=lerp(r2,limit2,0.04)
-  if (r2max-r2<1) limit2=r2min
-  if (r2-r2min<1) limit2=r2max		  
-end
-
-function _draw()
-	cls(15)
-	circfill(64,64,r1,7)
-	circfill(64,64,r2,15)
-end
-
--->8
--- utils
-
--- linear interpolation
-function lerp(start,finish,t)
-	return mid(start,start*(1-t)+finish*t,finish)
-end
+flip() goto _
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

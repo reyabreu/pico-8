@@ -20,7 +20,8 @@ function _draw()
 	draw_bg()
 	draw_ball()
 	draw_paddle()
-	print("sz:"..ball.sz,4,10,7)
+	print("sz:"..ball.sz,4,10,5)
+	print("sz:"..ball.sz,3,10,6)	
 	print_time()
 end
 
@@ -42,7 +43,7 @@ function draw_ball()
 end
 
 function update_ball()
-	-- bouncinf off walls
+	-- bouncing off walls
 	
 	--side walls
 	ball.x+=ball.spx
@@ -107,7 +108,7 @@ pad={}
 
 function make_paddle()
 	pad.x=52
-	pad.y=100
+	pad.y=115
 	pad.w=20
 	pad.h=4
 	pad.spd=3
@@ -143,14 +144,12 @@ function update_time()
 end
 
 function print_time()
-	print("tsec:"..tsec,4,4,7)
+ print("tsec:"..tsec,4,4,5)
+	print("tsec:"..tsec,3,4,6)
 end
 
 function lerp(start,finish,t)
- if (t<=0) return start
- if (t>=1) return finish
- local value = (1-t)*start+t*finish
- if (abs(finish-value) > 0.01) return value else return finish
+ return mid(start,(1-t)*start+t*finish,finish)
 end
 -->8
 -- collisions

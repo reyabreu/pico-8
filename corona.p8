@@ -1,46 +1,29 @@
 pico-8 cartridge // http://www.pico-8.com
-version 18
+version 20
 __lua__
--- main routines
-
-r1max=40
-r1min=10
-
-r2max=20
-r2min=5
-
-
-function _init()
- cls(15)
- r1=r1min
- limit1=r1max 
- r2=r2min
- limit2=r2max  
+l,p,q=64,.1,circfill
+::_::
+cls(1)
+k=t()/5
+for g=0,127 do 
+	j=g<l
+	i=g%l
+	z=1-i/32
+	s=sqrt(1-z*z)
+	x=s*cos(p*i)
+	b=s*sin(p*i)
+	a=x*cos(k)-z*sin(k)
+	c=x*sin(k)+z*cos(k)
+	c+=4
+	o=c/235
+	h=a/o+l
+	m=b/o+l
+	if(j==(c>4)) line(h,m,l+a/o*.8,l+b/o*.8,j and 14 or 8) q(h,m,7-c)
+	if(j) q(l,l,48,6) 
 end
-
-function _update()
-		r1=lerp(r1,limit1,0.05)
-  if (r1max-r1<1) limit1=r1min
-  if (r1-r1min<1) limit1=r1max		
-  
-		r2=lerp(r2,limit2,0.04)
-  if (r2max-r2<1) limit2=r2min
-  if (r2-r2min<1) limit2=r2max		  
-end
-
-function _draw()
-	cls(15)
-	circfill(64,64,r1,7)
-	circfill(64,64,r2,15)
-end
-
--->8
--- utils
-
--- linear interpolation
-function lerp(start,finish,t)
-	return mid(start,start*(1-t)+finish*t,finish)
-end
+p+=.0001
+flip()
+goto _
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

@@ -1,0 +1,184 @@
+pico-8 cartridge // http://www.pico-8.com
+version 18
+__lua__
+-- main
+zlayers={-1,0,1}
+
+function _init()
+
+end
+
+function _update()
+	mode:update()
+end
+
+function _draw()
+	mode:draw()
+end
+-->8
+-- modes
+function foreach_game_object(callback)
+  local layer,obj
+  for layer in all(zlayers) do
+    local list=mode.gobjects[layer]
+    for obj in all(list) do
+      callback(obj,layer,list)
+    end
+  end
+end
+
+function foreach_game_object_named(name,callback)
+  foreach_game_object(function(obj,layer,list)
+    if (obj.name==name) callback(obj,layer,list)
+  end)
+end
+
+function filter_out_finished()
+  foreach_game_object(function(obj,layer,list)
+    if (obj.finished) del(list,obj)
+  end)
+end
+
+function default_init(mode)
+  --clean game objects
+  local layer
+  mode.gobjects={}
+  for layer in all(zlayers) do
+    mode.gobjects[layer]={}
+  end
+end
+
+function default_update(mode)
+  --update all game objects
+  foreach_game_object(function(obj)
+    obj:update()
+  end)
+
+  --filter out "dead" objects
+  filter_out_finished()
+end
+
+function default_draw(mode)
+  cls(mode.bgcolour)--clear the screen
+
+  --draw visible game objects
+  foreach_game_object(function(obj)
+    if (obj.visible) obj:draw()
+  end)
+end
+
+function add_mode(name,init,update,draw,skip_default)
+  local function wrap(default,custom)
+    return function(mode)
+      if (not skip_default) default(mode)
+      custom(mode)
+    end
+  end
+
+	 --set default routines for mode
+  local new_mode={
+    name=name,
+    init=wrap(default_init,init),
+    update=wrap(default_update,update),
+    draw=wrap(default_draw,draw)
+  }
+
+  if (all_modes==nil) all_modes={}
+  all_modes[name]=new_mode
+  return new_mode
+end
+
+function set_mode(name)
+  mode=all_modes[name]
+  assert(mode!=nil,"undefined mode "..name)
+  mode:init()
+  return mode
+end
+-->8
+--collisions
+function rects_overlapping(left1,top1,right1,bottom1,left2,top2,right2,bottom2)
+  return right1>left2 and right2>left1 and bottom1>top2 and bottom2>top1
+end
+
+function bounding_boxes_overlapping(obj1,obj2)
+  return rects_overlapping(obj1.x,obj1.y,obj1.x+obj1.width,obj1.y+obj1.height,obj2.x,obj2.y,obj2.x+obj2.width,obj2.y+obj2.height)
+end
+
+-->8
+--utils
+function ternary(condition,if_true,if_false)
+  return condition and if_true or if_false
+end
+
+function rndb(low,high)
+  return flr(rnd(high-low+1)+low)
+end
+
+function lerp(start,finish,factor)
+	return mid(start,start*(1-factor)+finish*factor,finish)
+end
+
+--seq[1] is the starting seed. delta=gap/2
+function make_noise(seq,sz,delta,lo,hi)
+  lo=lo or 0
+  hi=hi or 127
+  srand(seq[1])
+  for i=2,sz do
+    seq[i]=mid(lo,rndb(seq[i-1]-delta,seq[i-1]+delta),hi)
+  end
+  srand(time())
+end
+
+--prints stereo text
+function print_stereo(txt,x,y,col,bg)
+	col=col or 6 --light gray
+	bg=bg or 5 --dark gray
+	print(txt,x+1,y,bg)
+	print(txt,x,y,col)	
+end
+
+--prints outlined text
+function print_outline(txt,x,y,col,bg)
+  col=col or 7 --white
+  bg=bg or 5 --light gray
+  for i=-1,1 do
+    for j=-1,1 do
+      print(txt,x+j,y+i,bg)
+    end
+	end
+	print(txt,x,y,col)
+end
+
+--prints multiple lines in table doc using printer
+function print_ml(doc,x,y,lh,printer)
+  local offset=0
+	foreach(doc,function(txt)
+		printer(txt,x,y+offset)
+		offset+=lh
+	end)
+end
+__gfx__
+b0000000006600000000000000000000000000000aaaaaaaa00000aaaa00000aaaaaaa00aaaaaaa0000000000000000000000000000000000000000000000000
+bb00000000990000000000000000000000000000aaaaaaaaaa000aaaaaa000aaaaaaaaa0aaaaaaa0000000000000000000000000000000000000000000000000
+bbb0000000490000006600000000000000000000aaaa0000aa000aa00aa000aaaaaaaaa0aaa00000000000000000000000000000000000000000000000000000
+bb00000009889000009900000000000000000000aaa000000a00aaa00aaa00aa0aa00aa0aaa00000000000000000000000000000000000000000000000000000
+b000000090880900098890000000000000000000aa0000000000aa0000aa00aa0aa00aa0aaaaaaa0000000000000000000000000000000000000000000000000
+0000000000cc0000908809000000000000000000aa00aaaaaa00aa0000aaa0aa0aa00aa0aaaaaaa0000000000000000000000000000000000000000000000000
+000000000c00c00000cc00000000000000000000aa00aaaaaa0aaaaaaaaaa0aa0aa00aa0aaa00000000000000000000000000000000000000000000000000000
+0000000007007000070070000000000000000000aaa0000aa00aaaaaaaaaa0aa0aa00aa0aaa00000000000000000000000000000000000000000000000000000
+0000000000066000000000000000000000000000aaaa000aa00aaa0000aaa0aa0aa00aa0aaa00000000000000000000000000000000000000000000000000000
+0000000000099000000000000000000000000000aaaaaaaaa00aaa0000aaa0aa0aa00aa0aaaaaaa0000000000000000000000000000000000000000000000000
+00000000900490000000000000000000000000000aaaaaaaa00aaa0000aaa0aa0aa00aa0aaaaaaa0000000000000000000000000000000000000000000000000
+00000000099889000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000880900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000880000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000c0c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000070007000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000066000000000000000660000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000099000000000000000990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000049000000660000900490000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000988900000990000099889000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000009088090009889000000880900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000000000000000000cc000090880900000880000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000c00c00000cc000000c0c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000700700007007000070007000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
