@@ -65,38 +65,38 @@ function update_ball()
 	ball.sz=3-flr(sin(tsec/3.5))
 	
 	-- paddle collision detection
-	local sx,sy,ssz=ball.x,ball.y,ball.sz
+	local sx,sy,ssz=ball.x,ball.y,3--ball.sz
 	local tx,ty,tw,th=pad.x,pad.y,pad.w,pad.h
 
 	-- if pad collision
-	if check_collision(sx,sy,ssz,tx,ty,tw,th) then	
-		local is_horiz=is_horiz_impact(sx,sy,ssz,tx,ty,tw,th)
-		local is_vert=is_vert_impact(sx,sy,ssz,tx,ty,tw,th)
+	if has_collision(sx,sy,ssz,tx,ty,tw,th) then	
+		local has_h=lby+ssz<ty or lby-ssz>ty+th
+		local has_v=lbx+ssz<tx or lbx-ssz>tx+tw
 		
 		-- on corner
-		if is_horiz and is_vert then
-			is_horiz=1+flr(rnd(10))>5
-			is_vert=not is_horiz
+		if has_h and has_v then
+			has_h=1+flr(rnd(10))>5
+			has_v=not has_h
 		end
 	
-	 -- on horiz surface
-		if is_horiz then
-			if ball.y<pad.y then
-				ball.y=pad.y-ball.sz
+	 	-- on horiz surface
+		if has_h then
+			if lby<ty then
+				ball.y=ty-ssz
 			else
-				ball.y=pad.y+pad.h+ball.sz
+				ball.y=ty+th+ssz
 			end
-			ball.spy=-ball.spy
+			ball.spy*=-1
 		end
 
-	 -- on vert surface
-		if is_vert then
-			if ball.x<pad.x then
-				ball.x=pad.x-ball.sz
+	 	-- on vert surface
+		if has_v then
+			if lbx<tx then
+				ball.x=tx-ssz
 			else
-				ball.x=pad.x+pad.w+ball.sz
+				ball.x=tx+tw+ssz
 			end
-			ball.spx=-ball.spx
+			ball.spx*=-1
 		end
 		
 		sfx(1)	
@@ -153,28 +153,10 @@ function lerp(start,finish,t)
 end
 -->8
 -- collisions
-function check_collision(sx,sy,ssz,tx,ty,tw,th)
-	local x,y=sx,sy
-	return x+ssz>=tx and x-ssz<=tx+tw and y+ssz>=ty and y-ssz<=ty+th
+function has_collision(sx,sy,ssz,tx,ty,tw,th)
+	return sx+ssz>tx and sx-ssz<tx+tw and sy+ssz>ty and sy-ssz<ty+th
 end
 
-function is_horiz_impact(sx,sy,ssz,tx,ty,tw,th)	
-	if check_collision(sx,sy,ssz,tx,ty,tw,th) then
-		local x,y=sx,sy		
-		return abs(y+ssz-ty)<=ssz or abs(y-ssz-(ty+th))<=ssz
-	else
-		return false
-	end
-end
-
-function is_vert_impact(sx,sy,ssz,tx,ty,tw,th)
-	if check_collision(sx,sy,ssz,tx,ty,tw,th) then
-		local x,y=sx,sy		
-		return abs(x+ssz-tx)<=ssz or abs(x-ssz-(tx+tw))<=ssz
-	else
-		return false
-	end
-end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

@@ -1,65 +1,43 @@
 pico-8 cartridge // http://www.pico-8.com
 version 18
 __lua__
--- circle mover
--- by reynaldo
+lt={}
 
-function _init()
-	make_player()
+function rndb(lo,hi)
+	return flr(lo+rnd(hi-lo+1))
 end
 
-function _update()
-	cls()
-	move_player()
+function nline(prev)
+	return mid(20,rndb(prev-3,prev+3),40)
+end
+
+function _init()
+	cls(1)
+	-- set clip area
+	clip(20,20,81,81)
+
+	-- fill lines array
+ 	lt[1]=rndb(25,35)
+	for i=2,64 do -- count up
+		add(lt,nline(lt[i-1]))
+	end
 end
 
 function _draw()
-	draw_player()
-	log_player()
-end
--->8
---player
-p={} --global
-
-function make_player()
-	p.x=64	p.y=64
-	p.speed=5
-	p.radius=2
-	p.last={p.x,p.y}
-end
-
-function move_player()
- local dx=0
- local dy=0
- local k=1
- 
-	if (btn(⬅️)) dx-=1  
-	if (btn(➡️)) dx+=1
-	if (btn(⬆️)) dy-=1
-	if (btn(⬇️)) dy+=1  
+	-- draw border of clip area
+	rect(20,20,100,100,10)
 	
-	if (dx~=0 and dy~=0) k=0.707
-	
-	p.last[0]=p.x	p.last[1]=p.y
-	
-	p.x=clamp(p.x+dx*flr(k*p.speed),p.radius,127-p.radius)
-	p.y=clamp(p.y+dy*flr(k*p.speed),p.radius,127-p.radius)
+	-- draw lines
+	i=1
+	for x=0,127,2 do
+		line(x,80-lt[i],x,80,rndb(7,9))
+		i+=1
+	end
+	-- set pixels in clip bounds
+	pset(20,20,12)
+	pset(100,100,12)
 end
 
-function draw_player()
-	circfill(p.x,p.y,p.radius,7)
-end
--->8
---utilities
-function clamp(value,vmin,vmax)
-	if (value>vmax) return vmax
-	if (value<vmin) return vmin
-	return value
-end
-
-function log_player()
-	print("x,y:"..p.x.." "..p.y,4,4,9)
-end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
