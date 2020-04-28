@@ -2,11 +2,20 @@ pico-8 cartridge // http://www.pico-8.com
 version 20
 __lua__
 --main
-function make_state(fr,fu,fd)
+function make_state(fi,fu,fd,dv)
 	local state={
-		rst=fr,
+		ini=fi,
 		upd=fu,
-		drw=fd
+		drw=fd,
+		t=20,--state change ticker
+		nxt=function(self,v)
+			if self.t<=0 then
+				scene=v
+				states[scene]:ini()
+				log:log(v)
+				self.t=20--reset timer				
+			end
+		end
 	}
 	return state
 end
@@ -14,55 +23,47 @@ end
 function _init()
  --log:hide()
 	states={
-		title   =make_state(title_reset,title_update,title_draw),
-		game    =make_state(game_reset,game_update,game_draw),
-		gameover=make_state(gameover_reset,gameover_update,gameover_draw)
+		title   =make_state(title_init,title_update,title_draw),
+		game    =make_state(game_init,game_update,game_draw),
+		gameover=make_state(gameover_init,gameover_update,gameover_draw)
 	}
+	--initial scene
 	scene="title"
-	states[scene].rst()
-	log:log(scene)
+	states[scene]:ini()
 end
 
 function _update()
-	if (sel_delay>0) sel_delay-=1
-	states[scene].upd()
+	local st=states[scene]
+	st:upd()
+	if (st.t>0) st.t-=1	
 end
 
 function _draw()
-	states[scene].drw()
+	states[scene]:drw()
+	--log
 	log:drw()	
 end
 
 -->8
 --title
-title={
-	"game title",
-	"by reyabreu"
-}
-
-title_choices={}
-
-function title_reset()
- sel_delay=10
+function title_init(st)
 	cls(2)
 end
 
-function title_update()
-	if sel_delay<=0 and btn(4) then
-		scene="game"
-		states[scene].rst()
-		log:log(scene)		
-	end
+function title_update(st)
+	if (btn(4))	st:nxt("game")
 end
 
-function title_draw()
+function title_draw(st)
+	local title={
+		"game title",
+		"by reyabreu"
+	}
 	print_ml(title,30,48,8,print_outline)
 end
 -->8
 --game
-function game_reset()
- sel_delay=10
-	cls(1)
+function game_init(st)
 	circle={
 		x=64,y=64,
 		r=10,
@@ -70,76 +71,79 @@ function game_reset()
 		rmax=30,
 		rmin=10,
 		c=15,
-		timer=3
+		timer=50
 	}
 end
 
-function game_update()
+function game_update(st)
+	circle.timer-=1
+ 
  --game logic
 	if circle.rmax-circle.r<1 then
-		--circle.r=circle.rmax
 		circle.target=circle.rmin
-		circle.timer-=1
 	end
 	if circle.r-circle.rmin<1 then
-	 --circle.r=circle.rmin
 	 circle.target=circle.rmax
-		circle.timer-=1
 	end
-	circle.r=lerp(circle.r,circle.target,0.05)	
+	circle.r=lerp(circle.r,circle.target,0.05)
 	
 	--game over
-	if circle.timer<=0 then
-		scene="gameover"
-		states[scene].rst()
-	 log:log(scene)		
-	end	
+	if (circle.timer<=0)	st:nxt("gameover")
 end
 
-function game_draw()
+function game_draw(st)
 	cls(1)
 	circfill(circle.x,circle.y,circle.r,circle.c)
 end
 -->8
 --game over
 text={
-	"game over!",
 	"press x to try again",	
 	"press z to return to title",
 }
-function gameover_reset()
-	sel_delay=10
-	cls(12)
-	explosion={x=54,y=54,r=120}
+
+function make_choice(str,x,y,sn)
+	local choice={
+		str=str,
+		x=x,
+		y=y,
+		scene=sn,
+		timer=50,
+		cols={7,11},
+		upd=function(s)
+			s.timer-=1
+		end,
+		drw=function(s)
+			print(s.str,s.x,s.y,s.cols[s.timer%2+1])
+		end
+	}	
+	return choice
 end
 
-function gameover_update()
-	if sel_delay<=0 and not choice then
-		if (btn(4)) choice={txt=text[3],scene="title",timer=50,c=11}
-		if (btn(5))	choice={txt=text[2],scene= "game",timer=50,c=11}
+function gameover_init(st)
+	cls(12)
+end
+
+function gameover_update(st)
+	if not choice then
+		if (btn(🅾️)) choice=make_choice(text[2],10,48+24,"title")
+		if (btn(❎)) choice=make_choice(text[1],10,48+24,"game")
  end
  
  if choice then
-		choice.c=choice.timer%2==0 and 11 or 12
-  choice.timer-=1
+ 	choice:upd()
 		if choice.timer<=0 then
-			scene=choice.scene
-			states[scene].rst()
-			log:log(scene)
-			log:hide(false)
+			st:nxt(choice.scene)
 			choice=nil
 		end
- end
- 
+ end 
 end
 
-function gameover_draw()
-	print_ml(text,10,48,8,print_outline)
-	
-	if choice then
-		print(choice.txt,10,48+24,c)
-	end	
-	
+function gameover_draw(st)
+ print_outline("game over!",10,48,8)
+ print_outline(text[1],10,48+8)
+ print_outline(text[2],10,48+16)  
+	if (choice)	choice:drw()
 end
 -->8
 --utils
