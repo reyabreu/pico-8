@@ -12,7 +12,7 @@ function make_state(fr,fu,fd)
 end
 
 function _init()
- log:hide()
+ --log:hide()
 	states={
 		title   =make_state(title_reset,title_update,title_draw),
 		game    =make_state(game_reset,game_update,game_draw),
@@ -192,7 +192,7 @@ log={
 		lh=mid(2,self.h,127)		
 		rectfill(self.x,self.y,self.x+lw,self.y+lh,bg)
 		for i=1,#self.msgs do
-			print(i..":"..self.msgs[i],self.x+1,self.y-5+6*i,7)
+			print(":"..self.msgs[i],self.x+1,self.y-5+6*i,7)
 		end
 	end
 }
