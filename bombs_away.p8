@@ -47,6 +47,7 @@ function create_bomb(x,y)
 	local bomb={
 		x=x,y=y,
 		vy=2,
+		g=0.04,
 		hb=get_bomb_hb
 	}
 	return bomb
@@ -61,15 +62,23 @@ function _init()
 	
 	--camera coordinates
 	camx,camy=8,0
-	
-	enemy=create_enemy(flr((camx+128)/2),17)
-	player=create_player(flr((camx+128)/2),122)
-	srand(t())
-	palt(0,false)
-	palt(11,true)	
-
 	--screen shake
 	shkx,shky=0,0
+	
+	srand(t())
+	
+	palt(0,false)
+	palt(11,true)
+	
+	enemy=create_enemy(flr((camx+128)/2),17)
+	player=create_player(flr((camx+128)/2),122)	
+	
+	title_init()
+end
+
+function game_init()
+	_update=game_update
+	_draw=game_draw		
 end
 
 function update_enemy()
@@ -103,7 +112,7 @@ function update_enemy()
 		if (rndb(1,100)>99) enemy.timer=flr(0.5*enemy.w-enemy.timer)
 end
 
-function move_player()
+function update_player()
 	if (btn(0)) player.d=-1 player.vx=player.max_spd
 	if (btn(1)) player.d=1 player.vx=player.max_spd
 	
@@ -114,7 +123,13 @@ function move_player()
 	player.x=mid(camx+14,player.x+player.vx*player.d,camx+114)
 end
 
-function _update()
+function create_particle(x,y,vx,vy)
+	local particle={x=x,y=y,vx=vx,vy=vy,c=10,age=0}
+	add(particles,particle)
+end
+
+
+function game_update()
 	--srand(t())
 	if (player.timer>0) player.timer-=1
 	
@@ -122,7 +137,8 @@ function _update()
 	
 	--bombs
 	for b in all(bombs) do
-		if (animtimer%3==0)	create_particle(b.x+3,b.y-4,0.3,-0.5)
+		if (animtimer%3==0)	create_particle(b.x+3,b.y-4,0.3,-0.1)
+		b.vy+=b.g
 		b.y+=b.vy
 		--off screen
 		if b.y>128 then
@@ -149,6 +165,8 @@ function _update()
 		p.age+=1
 		if p.age>15 then
 			del(particles,p)
+		elseif p.age>12 then
+			p.c=5
 		elseif p.age>10 then
 			p.c=4
 		elseif p.age>5 then
@@ -160,7 +178,7 @@ function _update()
 
 	update_enemy()
 		
-	move_player()
+	update_player()
 	
 	--explosions
 	for e in all(explosions) do
@@ -177,12 +195,7 @@ function _update()
 	if (animtimer>=30000) animtimer=0	
 end
 
-function create_particle(x,y,vx,vy)
-	local particle={x=x,y=y,vx=vx,vy=vy,c=10,age=0}
-	add(particles,particle)
-end
-
-function _draw()
+function game_draw()
  --bg
 	cls(13)
 	--set camera
@@ -197,7 +210,8 @@ function _draw()
 	spr(lives>2 and 2 or 3,camx+17,camy+1)
 	
 	--score
-	print_stereo("score:"..score,camx+90,camy+1)	
+	local fscore=sub("00",#tostr(score))..score
+	print_stereo("score:"..fscore,107-camx,camy+1)
 
 	--enemy
 	local cx=enemy.timer/enemy.w
@@ -232,6 +246,75 @@ function _draw()
 	end
 end
 -->8
+--title
+function title_init()
+	_update=title_update
+	_draw=title_draw	
+end
+
+function title_update()
+	if (btn(🅾️)) ready_init()
+end
+
+function title_draw()
+	cls(13)
+
+	--set camera
+	camera(camx+shkx,camy+shky)
+	
+	map()	
+	local str={"annoying cherrys","by @reyabreu","press 🅾️ to play"}
+	print_outline(str[1],camx+64-2*#str[1],camy+64-8,15)
+	print_outline(str[2],camx+64-2*#str[2],camy+64,15)
+	print_outline(str[3],camx+64-2*#str[3],camy+64+28,15)
+end
+
+--ready
+function ready_init()
+ ready_timer=60
+	_update=ready_update
+	_draw=ready_draw	
+end
+
+function ready_update()
+	ready_timer-=1
+	
+	update_player()
+	
+	if (ready_timer<=0) game_init()
+end
+
+function ready_draw()
+	cls(13)
+
+	--set camera
+	camera(camx+shkx,camy+shky)
+
+	map()
+
+	--lives
+	local lives=player.lives
+ spr(lives>0 and 2 or 3,camx+1,camy+1)
+	spr(lives>1 and 2 or 3,camx+9,camy+1)	
+	spr(lives>2 and 2 or 3,camx+17,camy+1)
+	
+	--score
+	local fscore=sub("00",#tostr(score))..score
+	print_stereo("score:"..fscore,107-camx,camy+1)
+
+	--enemy
+	local cx=enemy.timer/enemy.w
+	outline_spr(enemy.btimer<5 and 13 or 11,enemy.x-8,enemy.y-8,2,2,cx>0.25 and cx<0.75)
+
+		--player
+	outline_spr(player.spi,player.x-12,player.y-4,3,1)
+	
+	local str="get ready"
+	print_outline(str,camx+64-2*#str,camy+64-8,ready_timer%9+4)
+end
+-->8
+--utils
+
 --add smoothness
 function lerp(start,finish,factor)
 	return mid(start,start*(1-factor)+finish*factor,finish)
@@ -250,6 +333,26 @@ function print_stereo(txt,x,y,col,bg)
 	bg=bg or 5 --dark gray
 	print(txt,x+1,y,bg)
 	print(txt,x,y,col)	
+end
+
+--print outlined text
+function print_outline(txt,x,y,col,bg)
+	col=col or 7 --white
+	bg=bg or 5 --light gray
+ for i=-1,1 do
+ 	for j=-1,1 do
+  	print(txt,x+j,y+i,bg)
+  end
+	end
+	print(txt,x,y,col)
+end
+
+--- 64 is half of the screen width (128 / 2). to calculate the x
+-- coordinate, the length of the string is multiplied by half
+-- of the character width (4 / 2), then subtracted from 64.
+-- similarly, the y coordinate is 60 = 64 - (8 / 2).
+function print_centered(str)
+  print(str, 64 - (#str * 2), 60)
 end
 
 --draw sprites outlined in black
@@ -294,16 +397,16 @@ bbbbbbbbbbbbb9bbb88b885bb66b665b000000000000000000000000000000000000000011111111
 bbbbbbbbbbbb7bbb88888885666666650000000000000000000000000000000000000000ee1eeeee00000000bbbbbb444bbbbbbbbbbbbbbbbbbbbbbb00000000
 bb7bb7bbbb070bbb88788885666666650000000000000000000000000000000000000000881e888800000000bbbbb44444bbbbbbbbbbbb444bbbbbbb00000000
 bbb77bbbb05000bbb887885bb666665b0000000000000000000000000000000000000000881e888800000000bbbb4f4f444bbbbbbbbbb44444bbbbbb00000000
-bbb77bbbb00000bbbb8885bbbb6665bb00000000000000000000000000000000000000001111111100000000bbbb5585585bbbbbbbbb4f4f444bbbbb00000000
-bb7bb7bbb00005bbbbb85bbbbbb65bbb0000000000000000000000000000000000000000eeeee1ee00000000bbbb4ffffffbbbbbbbbb5585585bbbbb00000000
-bbbbbbbbbb005bbbbbbbbbbbbbbbbbbb0000000000000000000000000000000000000000888881e800000000bbbbfff00ffbbbbbbbbbfffffffbbbbb00000000
-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0000000000000000000000000000000000000000888881e800000000bbbbbfffffbbbbbbbbbbbff00fbbbbbb00000000
-00000000b4bbbbbbbbbbbb4bb4bbbbbbbbbbbbbbbbbbbb4b0000000000000000000000001111111100000000bbbbddfffddbbbbbbbbbddfffddbbbbb00000000
-000000004b4bbbbbbbbbb4b44b4bbbbbbbbbbbbbbbbbb4b4000000000000000000000000ee1eeeee00000000bbbb7d7f7d7bbbbbbbbb7d7f7d7bbbbb00000000
+bbb77bbbb00000bbbb8885bbbb6665bb00000000000000000000000000000000000000001111111100000000bbbbdd8dd8dbbbbbbbbb4f4f444bbbbb00000000
+bb7bb7bbb00005bbbbb85bbbbbb65bbb0000000000000000000000000000000000000000eeeee1ee00000000bbbb4ffffffbbbbbbbbbdd8dd8dbbbbb00000000
+bbbbbbbbbb005bbbbbbbbbbbbbbbbbbb0000000000000000000000000000000000000000888881e800000000bbbbfff55ffbbbbbbbbbfffffffbbbbb00000000
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0000000000000000000000000000000000000000888881e800000000bbbbbffffffbbbbbbbbbbff55fbbbbbb00000000
+00000000b4bbbbbbbbbbbb4bb4bbbbbbbbbbbbbbbbbbbb4b0000000000000000000000001111111100000000bbbbddffffbbbbbbbbbbddf55fbbbbbb00000000
+000000004b4bbbbbbbbbb4b44b4bbbbbbbbbbbbbbbbbb4b4000000000000000000000000ee1eeeee00000000bbbb7d7ffd7bbbbbbbbb7d7ffd7bbbbb00000000
 000000004b949494949494b44b44c4c4c4c4c4c4c4c4c4b4000000000000000000000000881e888800000000bbb575d5d575bbbbbbb575d5d675bbbb00000000
-00000000b44999999999995bb44ccccccccccccccccccc4b000000000000000000000000881e888800000000bb7757d7d7577bbbbb77570067577bbb00000000
-00000000bb444949494945bbbb444c4c4c4c4c4c4c4c44bb0000000000000000000000001111111100000000bb57b5ddd5b75bbbbb57b00500b75bbb00000000
-00000000bbb4444444445bbbbbb444444444444444444bbb000000000000000000000000eeeee1ee00000000bb75bd777db57bbbbb75b00000b57bbb00000000
+00000000b44999999999995bb44ccccccccccccccccccc4b000000000000000000000000881e888800000000bb7757d7d7577bbbbb775700d7577bbb00000000
+00000000bb444949494945bbbb444c4c4c4c4c4c4c4c44bb0000000000000000000000001111111100000000bb57bdddddb75bbbbb57b00500b75bbb00000000
+00000000bbb4444444445bbbbbb444444444444444444bbb000000000000000000000000eeeee1ee00000000bb75bdddddb57bbbbb75b00000b57bbb00000000
 00000000bbbb44444445bbbbbbbb4444444444444444bbbb000000000000000000000000888881e800000000bb77fbbbbbf77bbbbbb770000577bbbb00000000
 00000000bbbbbb4444bbbbbbbbbbbb444444444444bbbbbb000000000000000000000000888881e800000000bbffbbbbbbbffbbbbbbfff005fffbbbb00000000
 000000000000000000000000b4bbbbbbbb7b7b7bbbbbbb4b00000000000000000000000011111111111111111111111111111111000000000000000000000000

@@ -9,44 +9,65 @@ text={
 	"the lazy dog"
 }
 
+function _init()
+ cur_scene=1
+	camx,camy=0,0
+	last=time()
+end
+
 function _draw()
 	cls(1)
-	print_stereo("a quick",52,0)
-	print_stereo("brown fox",52,6)
-	print_stereo("jumps over",52,12)
-	print_stereo("the lazy dog",52,18)
-	
-	print_outline("a quick",52,32)
-	print_outline("brown fox",52,40)
-	print_outline("jumps over",52,48)
-	print_outline("the lazy dog",52,56)
-	
-	local function wrap(printer,col,bg)
-		return function(txt,x,y)
-			printer(txt,x,y,col,bg)
+	camx=128*cur_scene%2
+	camera(camx,camy)
+	if cur_scene==1 then
+		print_stereo("a quick",52,0)
+		print_stereo("brown fox",52,6)
+		print_stereo("jumps over",52,12)
+		print_stereo("the lazy dog",52,18)
+		
+		print_outline("a quick",52,32)
+		print_outline("brown fox",52,40)
+		print_outline("jumps over",52,48)
+		print_outline("the lazy dog",52,56)
+		
+		local function wrap(printer,col,bg)
+			return function(txt,x,y)
+				printer(txt,x,y,col,bg)
+			end
 		end
+		
+		print_ml(text,0,0,6,wrap(print_stereo,10,5))
+		print_ml(text,0,32,8,wrap(print_outline,10,5))
+		print_ml(text,0,72,6,print)
+		
+		spr(1,100,70)
+		spr(1,100,80,1,1,true)	
+	
+		outline_spr(1,100,92)
+		outline_spr(1,100,103,1,1,true)	
+	
+		spr(2,110,70)
+		spr(2,110,80,1,1,false,true)	
+	
+		outline_spr(2,110,92)
+		outline_spr(2,110,103,1,1,false,true)	
+		
+		seq={25}
+		make_noise(seq,31,3,10,90)
+		for i=1,#seq do
+			line(52,65+i*2-1,52+seq[i],65+i*2-1,11)
+		end
+	else
+		print_outline("scene 2",camx+52,camy+64)
 	end
-	
-	print_ml(text,0,0,6,wrap(print_stereo,10,5))
-	print_ml(text,0,32,8,wrap(print_outline,10,5))
-	print_ml(text,0,72,6,print)
-	
-	spr(1,100,70)
-	spr(1,100,80,1,1,true)	
+	print_outline("press 🅾️",camx+2,camy+113,12,4)
+	print_outline("for more",camx+2,camy+121,12,4)
+end
 
-	outline_spr(1,100,92)
-	outline_spr(1,100,105,1,1,true)	
-
-	spr(2,110,70)
-	spr(2,110,80,1,1,false,true)	
-
-	outline_spr(2,110,92)
-	outline_spr(2,110,105,1,1,false,true)	
-	
-	seq={25}
-	make_noise(seq,31,3,10,90)
-	for i=1,#seq do
-		line(52,65+i*2-1,52+seq[i],65+i*2-1,11)
+function _update()
+	if time()-last>0.25 and btn(🅾️) then
+		cur_scene=(cur_scene+1)%2
+		last=time()
 	end
 end
 
