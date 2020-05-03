@@ -35,7 +35,7 @@ function _init()
 end
 
 function _update()
- man.update(man)
+ man:update()
 	if mget(man.x,man.y)==10 then
 		mset(man.x,man.y,26)
 		sfx(0)
@@ -47,7 +47,7 @@ function _draw()
  local room_x,room_y=flr(man.x/16),flr(man.y/16)
  camera(room_x*128,room_y*128)
  map()
-	man.draw(man)
+	man:draw()
 end
 __gfx__
 00000000000000000000000000088000000880000000000000000000000000000000000000000000dddddddddddddddddddddddddddddddddddddddddddddddd
