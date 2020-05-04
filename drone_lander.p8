@@ -2,7 +2,7 @@ pico-8 cartridge // http://www.pico-8.com
 version 20
 __lua__
 --drone lander
-g=0.01--gravity
+g=0.1--gravity
 
 function lerp(st,fi,f)
 	return mid(st,st*(1-f)+fi*f,fi)
@@ -16,67 +16,76 @@ function make_drone(x,y)
 		vx=0,vy=0,
 		maxv=3,
 		flipx=false,
-		flying=false,
-		battery=6
+		battery={
+			max_charge=6,
+			charge=6,
+			fill=function(b)
+				b.charge=b.max_charge
+			end,
+			is_empty=function(b)
+				return b.charge==0
+			end,
+			deplete=function(b)
+				if (not b:is_empty()) b.charge-=1
+			end
+		}
 	}
 	return drone
 end
 
 function _init()
 	drone=make_drone(64,64)
+	drone.battery:fill()
 end
 
 function _update()
-	local dx=0
-	local vx,vy,target_vy=drone.vx,drone.vy,drone.vy
-	
-	if (btn(2)) target_vy-=drone.acc
-	if (btn(3)) target_vy+=drone.acc
-	
-	--vertical mv
-	if btn(2) or btn(3) then
-		target_vy+=g
-	elseif drone.y<124 then
-		target_vy=drone.flying and 0 or 3+vy
+	local dx,dy,fh=0,0,drone.flipx
+	local vx,vy=drone.vx,drone.vy
+
+	--deplete battery
+	if (drone.timer%20)==0 then
+		drone.battery:deplete()
 	end
 	
-	--only if flying (horiz mv)
-	if drone.flying then
+	if (btn(2)) dy-=drone.acc
+	if (btn(3)) dy+=drone.acc
+
+	if not drone.battery:is_empty() then
 		drone.timer+=1
-		if (btn(0)) dx-=drone.acc drone.flipx=false
-		if (btn(1)) dx+=drone.acc drone.flipx=true
-		if (drone.timer%9==0) then
-			if (drone.battery>0) drone.battery-=1
-		end
-		if drone.timer>=200 then 
-			drone.timer=0
-		end
- end
+		if (drone.timer>200)	drone.timer=0
+	end
+		
+	if (btn(0)) dx-=drone.acc fh=false
+	if (btn(1)) dx+=drone.acc fh=true
 
 	--smoothen mv
-	if drone.battery>0 then
-		vy=lerp(vy,target_vy,0.08)
-	else
-		vy=g
-	end
+	vy=g+lerp(vy,vy+dy,0.2)
 	vx=lerp(vx,vx+dx,0.2)
 
 	vx*=0.95--friction
-	
-	drone.vx=abs(vx)<=drone.maxv and vx or sgn(vx)*drone.maxv
-	drone.vy=vy>=-drone.maxv and vy or -drone.maxv
+
+	if (drone.battery:is_empty()) then
+		drone.vy+=g
+	else
+		drone.vx=abs(vx)<=drone.maxv and vx or sgn(vx)*drone.maxv
+		drone.flipx=fh
+		if (btn(2) or btn(3)) then
+			drone.vy=vy>=-drone.maxv and vy or -drone.maxv
+		else
+			drone.vy=lerp(drone.vy,0,0.1)	
+		end
+	end
 
 	drone.x=mid(4,drone.x+drone.vx,124)
 	if (drone.x==4 or drone.x==124) drone.vx=0
 
 	drone.y=mid(5,drone.y+drone.vy,124)
 
-	drone.flying=drone.y<124 and drone.battery>0
+	--drone.flying=drone.y<124 and drone.battery>0
 	
 	--oscillate if flying
-	if drone.flying then
-		drone.y+=0.3*sin(0.01*drone.timer)
-	elseif drone.y==124 then
+	--drone.y+=0.3*sin(0.01*drone.timer)
+	if drone.y==124 then
 	 drone.vx,drone.vy=0,0
 	end 
 end
@@ -84,32 +93,26 @@ end
 function _draw()
 	cls(12)
 	
-	--battery level
-	if drone.battery>0 then
-		rectfill(122,2,125,7,10)
-	end	
 	palt(0,false)
 	palt(11,true)
-	for i=1,drone.battery do
-		palt(i,true)
-	end
-	for i=6,drone.battery,-1 do
-		pal(i,5)
-	end
+	--battery level
+	rectfill(122,2,125,8,5)
+	rectfill(122,2+(6-drone.battery.charge),125,8,10)
 	spr(9,120,1)
 	pal()
+	
 				
-	print("d.y:"..drone.y)
+	print("d.b:"..drone.battery.charge)	
 	spr(drone.timer%2+1,drone.x-4,drone.y-4,1,1,drone.flipx)
 end
 __gfx__
 000000005655056566660666565505656666066600000000000000000000000000000000bb0000bb000000000000000000000000000000000000000000000000
-000000000500005005000050050000500500005000000000000000000000000000000000b006600b000000000000000000000000000000000000000000000000
-007007000060650000666500006065000066650000000000000000000000000000000000b055550b000000000000000000000000000000000000000000000000
-000770000666685006666750066668500666675000000000000000000000000000000000b044440b000000000000000000000000000000000000000000000000
-000770000666665006666650063366500633665000000000000000000000000000000000b033330b000000000000000000000000000000000000000000000000
-007007006066560560665605606656056066560500000000000000000000000000000000b022220b000000000000000000000000000000000000000000000000
-000000006050060560500605050000600500006000000000000000000000000000000000b011110b000000000000000000000000000000000000000000000000
+000000000500005005000050050000500500005000000000000000000000000000000000b00bb00b000000000000000000000000000000000000000000000000
+007007000060650000666500006065000066650000000000000000000000000000000000b0bbbb0b000000000000000000000000000000000000000000000000
+000770000666685006666750066668500666675000000000000000000000000000000000b0bbbb0b000000000000000000000000000000000000000000000000
+000770000666665006666650063366500633665000000000000000000000000000000000b0bbbb0b000000000000000000000000000000000000000000000000
+007007006066560560665605606656056066560500000000000000000000000000000000b0bbbb0b000000000000000000000000000000000000000000000000
+000000006050060560500605050000600500006000000000000000000000000000000000b0bbbb0b000000000000000000000000000000000000000000000000
 000000000650600506506005000000000000000000000000000000000000000000000000b000000b000000000000000000000000000000000000000000000000
 00000000000550000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000009449000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
