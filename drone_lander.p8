@@ -2,7 +2,7 @@ pico-8 cartridge // http://www.pico-8.com
 version 20
 __lua__
 --drone lander
-g=0.1--gravity
+g=0.3--gravity
 
 function lerp(st,fi,f)
 	return mid(st,st*(1-f)+fi*f,fi)
@@ -12,7 +12,7 @@ function make_drone(x,y)
 	local drone={
 		x=x,y=y,
 		timer=0,
-		acc=2,
+		acc=3,
 		vx=0,vy=0,
 		maxv=3,
 		flipx=false,
@@ -43,14 +43,16 @@ function _update()
 	local vx,vy=drone.vx,drone.vy
 
 	--deplete battery
-	if (drone.timer%20)==0 then
+	if (drone.timer%50)==0 then
 		drone.battery:deplete()
 	end
+	local flying=drone.y<124 and 
+		not drone.battery:is_empty()
 	
 	if (btn(2)) dy-=drone.acc
 	if (btn(3)) dy+=drone.acc
 
-	if not drone.battery:is_empty() then
+	if flying then
 		drone.timer+=1
 		if (drone.timer>200)	drone.timer=0
 	end
@@ -80,13 +82,12 @@ function _update()
 	if (drone.x==4 or drone.x==124) drone.vx=0
 
 	drone.y=mid(5,drone.y+drone.vy,124)
-
-	--drone.flying=drone.y<124 and drone.battery>0
 	
 	--oscillate if flying
-	--drone.y+=0.3*sin(0.01*drone.timer)
 	if drone.y==124 then
 	 drone.vx,drone.vy=0,0
+	elseif flying then
+		drone.y+=0.3*sin(0.01*drone.timer)
 	end 
 end
 
