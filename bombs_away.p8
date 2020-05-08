@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 20
+version 23
 __lua__
 function create_player(x,y)
 	local player={
@@ -59,7 +59,6 @@ function _init()
 	particles={}
 	explosions={}
 	score=0
-	gameover=false
 	
 	--camera coordinates
 	camx,camy=8,0
@@ -174,22 +173,23 @@ function game_update()
 			p.c=9
 		end
 		p.x+=p.vx
-		p.y+=p.vy
-		
+		p.y+=p.vy		
 	end
+	
 
-	if not gameover then
+	if player.lives<=0 then
+		gameover_init()
+	else
 		update_enemy()		
-		update_player()
+		update_player()		
 	end
+	if (player.timer<=0) player.spi=19
 	
 	--explosions
 	for e in all(explosions) do
 	 e.r-=1
 	 if (e.r<=2) del(explosion,e)
 	end
-	
-	if (player.timer<=0) player.spi=19
 	
 	--update screen shake
 	update_shake()
@@ -355,7 +355,7 @@ end
 -- of the character width (4 / 2), then subtracted from 64.
 -- similarly, the y coordinate is 60 = 64 - (8 / 2).
 function print_centered(str)
-  print(str, 64 - (#str * 2), 60)
+  print(str, 64 - (#str*2), 60)
 end
 
 --draw sprites outlined in black
@@ -395,6 +395,25 @@ function update_shake()
  end
 end
 
+-->8
+--gameover
+function gameover_init()
+	_update=gameover_update
+	_draw=gameover_draw		
+end
+
+function gameover_update()
+	if (btn(❎)) _init()
+end
+
+function gameover_draw()
+	cls()
+	local txt="game over!"
+	for i=8,15 do
+		print(txt,68-2*#txt,50+2*i,i)
+	end
+	print(txt,68-2*#txt,60,7)	
+end
 __gfx__
 bbbbbbbbbbbbb9bbb88b885bb66b665b00000000000000000000000000000000000000001111111100000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb00000000
 bbbbbbbbbbbb7bbb88888885666666650000000000000000000000000000000000000000ee1eeeee00000000bbbbbb444bbbbbbbbbbbbbbbbbbbbbbb00000000

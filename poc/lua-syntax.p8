@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 18
+version 23
 __lua__
 lt={}
 
@@ -17,7 +17,7 @@ function _init()
 	clip(20,20,81,81)
 
 	-- fill lines array
- 	lt[1]=rndb(25,35)
+ lt[1]=rndb(25,35)
 	for i=2,64 do -- count up
 		add(lt,nline(lt[i-1]))
 	end
@@ -25,17 +25,19 @@ end
 
 function _draw()
 	-- draw border of clip area
-	rect(20,20,100,100,10)
-	
+	rectfill(20,20,100,100,0)	
 	-- draw lines
 	i=1
 	for x=0,127,2 do
-		line(x,80-lt[i],x,80,rndb(7,9))
+		line(x,80-lt[i],x,100,rndb(7,9))
 		i+=1
 	end
-	-- set pixels in clip bounds
+	-- draw border of clip area
+	rect(20,20,100,100,10)	
+
+	-- set pixels in clip vertexes
 	pset(20,20,12)
-	pset(100,100,12)
+	pset(100,100,12)	
 end
 
 __gfx__

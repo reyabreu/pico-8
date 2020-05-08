@@ -1,50 +1,70 @@
 pico-8 cartridge // http://www.pico-8.com
-version 18
+version 23
 __lua__
-oldpos={x=64, y=64}
-pos={x=64,y=64}
-radius=3
-speed=3
-
-black=0
-blue=1
-white=7
-orange=9
-
-function _update()
-	oldpos={x=pos.x, y=pos.y}
-	local dx=0
-	local dy=0
-	local m=speed
-	if (btn(⬅️)) then dx-=1 end
-	if (btn(➡️)) then dx+=1 end
-	if (btn(⬆️)) then dy-=1 	end
-	if (btn(⬇️)) then dy+=1 end
-	if (dx~=0 and dy~=0) then
-		m=flr(m*0.707)
-	end
-	pos.x=clamp(pos.x+m*dx,3,124)
-	pos.y=clamp(pos.y+m*dy,3,124)
+--main
+function lerp(start,finish,factor)
+	local value=mid(start,start*(1-factor)+finish*factor,finish)
+	if (abs(finish-value)<0.05) value=finish
+	return value
 end
 
-function clamp(value,vmin,vmax)
-	if (value>vmax) then
-		return vmax
-	elseif (value<vmin) then
-		return vmin
+function rr(v)
+	local av=abs(v)
+	local rup=av-flr(av)>=0.5
+
+	if v>0 then
+		if rup then
+			return flr(v)+1
+		else
+			return flr(v)
+		end
 	else
-		return value
+		if rup then
+			return flr(v)
+		else
+			return flr(v)-1
+		end
 	end
+end
+
+function _init()
+	pos={x=64,y=64}
+	spd={x=0,y=0}
+	radius=3
+	
+	black=0
+	blue=1
+	white=7
+	orange=9
+end
+
+function _update()
+	oldpos={x=pos.x,y=pos.y}
+	oldspd={x=spd.x,y=spd.y}
+	local dx,dy=0,0
+	local m=2
+	if (btn(⬅️)) then dx-=1 end
+	if (btn(➡️)) then dx+=1 end
+	if (btn(⬆️)) then dy-=1 end
+	if (btn(⬇️)) then dy+=1 end
+	if (dx~=0 and dy~=0) m=flr(m*0.707)
+
+	spd.x=lerp(spd.x,m*dx,0.1)		
+	spd.y=lerp(spd.y,m*dy,0.1)
+	
+	pos.x=mid(radius,rr(pos.x+spd.x),127-radius)	
+	pos.y=mid(radius,rr(pos.y+spd.y),127-radius)
 end
 
 function _draw()
 	rectfill(0,0,127,127,blue)
-	print("x,y:"..pos.x..","..pos.y,4,4,white)
+	print("x,y:"..pos.x..","..pos.y,1,1,white)
 	circfill(pos.x,pos.y,radius,orange)
-	local dx=pos.x-oldpos.x
-	local dy=pos.y-oldpos.y
+	local dx=abs(pos.x-oldpos.x)
+	local dy=abs(pos.y-oldpos.y)
+	print("sx="..abs(spd.x)..",sy="..abs(spd.y),1,7,white)
 	--print("dx,dy:"..dx..","..dy,4,10,white)	
-	line(pos.x,pos.y,pos.x+dx*speed,pos.y+dy*speed,white)
+	line(pos.x,pos.y,pos.x+dx*spd.x,pos.y+dy*spd.y,white)
 end
 __gfx__
 00000000002aa000000aa20000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
