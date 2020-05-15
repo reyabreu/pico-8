@@ -1,31 +1,56 @@
 pico-8 cartridge // http://www.pico-8.com
 version 26
 __lua__
-u=63
-v=u*u
-g=pget 
-s=pset
-f=flr
-for i=0,v do
-	s(i%u*2,f(i/u)*2,f(rnd(2))*7)
+boards={}
+
+function _init()
+	board={
+		x=10,
+		y=30,
+		csz=10,
+		bcol=10,
+		vcol=12,
+		cw=3,
+		ch=3,
+		cells={},
+		clear_cells=function(b)
+			b.cells={}
+		end,
+		set_cell=function (b,r,c,v)
+			add(b.cells,{r=r,c=c,v=v})
+		end,
+		
+	}
+	add(boards,board)		
 end
-::_::
-m={}
-for i=0,v do
- x,y=i%u*2,f(i/u)*2
-	n=-(g(x,y)>0 and 1 or 0)
-	for j=0,8 do
-	 a=x+2*(j%3-1)
-	 b=y+2*f(j/3-1)
-		if (g(a,b)>0) n+=1
+
+function _update()
+	board:clear_cells()
+	board:set_cell(1,2,12)
+	board:set_cell(1,3,12)
+end
+
+function _draw()
+	cls()
+	local x,y
+	for b in all(boards) do
+		y=b.y		
+		for j=1,b.cw do		
+			x=b.x		
+			for i=1,b.ch do
+				rect(x,y,x+b.csz,y+b.csz,b.bcol)
+				x+=b.csz				
+			end			
+			y+=b.csz	
+		end
+		for c in all(b.cells) do
+			x=b.x+flr((c.r-1/2)*b.csz)
+			y=b.y+flr((c.c-1/2)*b.csz)
+			circ(x,y,3,c.v)
+			--pset(x,y,c.v)
+		end
 	end
-	if (n>1 and n<4) add(m,{x=x,y=y})
 end
-cls()
-for q in all(m) do 
-	s(q.x,q.y,7)
-end
-goto _
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

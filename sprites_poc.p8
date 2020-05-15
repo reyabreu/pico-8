@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 20
+version 26
 __lua__
 subm={
 	x=24,y=24,flipx=false,by=0.05
@@ -53,7 +53,11 @@ end
 --draw submarine
 cls(12)
 local room_x,room_y=flr(subm.x/16),flr(subm.y/16)
-camera(room_x*128,room_y*128)
+--camera(room_x*128,room_y*128)
+local camx,camy=subm.x*8-60,subm.y*8-60
+camx=mid(0,camx,896)
+camy=mid(0,camy,896)
+camera(camx,camy)
 map(16,16)
 palt(0,false)
 palt(11,true)

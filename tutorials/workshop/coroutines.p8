@@ -1,31 +1,45 @@
 pico-8 cartridge // http://www.pico-8.com
 version 26
 __lua__
-u=63
-v=u*u
-g=pget 
-s=pset
-f=flr
-for i=0,v do
-	s(i%u*2,f(i/u)*2,f(rnd(2))*7)
+function _init()
+	c_move=cocreate(move)
 end
-::_::
-m={}
-for i=0,v do
- x,y=i%u*2,f(i/u)*2
-	n=-(g(x,y)>0 and 1 or 0)
-	for j=0,8 do
-	 a=x+2*(j%3-1)
-	 b=y+2*f(j/3-1)
-		if (g(a,b)>0) n+=1
+
+function _update()
+	if (c_move==nil) c_move=cocreate(move)
+	if c_move and costatus(c_move)~="dead" then
+		coresume(c_move)
+	else 
+		c_move=nil
 	end
-	if (n>1 and n<4) add(m,{x=x,y=y})
 end
-cls()
-for q in all(m) do 
-	s(q.x,q.y,7)
+
+function _draw()
+	cls()
+	circ(x,y,r,12)
 end
-goto _
+
+function move()
+	x,y=32,32
+	r=10
+	yield()
+	for i=0,60 do
+		x+=1
+		yield()
+	end	
+	for i=0,60 do
+		y+=1
+		yield()
+	end
+	for i=0,60 do
+		x-=1
+		yield()
+	end	
+	for i=0,60 do
+		y-=1
+		yield()
+	end	
+end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
