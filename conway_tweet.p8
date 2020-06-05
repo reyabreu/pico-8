@@ -1,30 +1,25 @@
 pico-8 cartridge // http://www.pico-8.com
 version 26
 __lua__
-u=63
-v=u*u
-g=pget 
-s=pset
-f=flr
-for i=0,v do
-	s(i%u*2,f(i/u)*2,f(rnd(2))*7)
+cls()
+z=63
+s=mset 
+g=flr
+for i=0,z*z,1 do
+s(i%z,i/z,rnd(2))
 end
 ::_::
-m={}
-for i=0,v do
- x,y=i%u*2,f(i/u)*2
-	n=-(g(x,y)>0 and 1 or 0)
-	for j=0,8 do
-	 a=x+2*(j%3-1)
-	 b=y+2*f(j/3-1)
-		if (g(a,b)>0) n+=1
-	end
-	if (n>1 and n<4) add(m,{x=x,y=y})
+for i=0,z*z,1 do
+pset(g(i%z)*2,g(i/z)*2,mget(i%z,i/z)*7)
 end
-cls()
-for q in all(m) do 
-	s(q.x,q.y,7)
-end
+for i=0,z*z,1 do
+x=g(i%z)
+y=g(i/z)
+n=-mget(x,y)
+for j=0,8,1 do
+if(pget(g(x+j%3-1)*2,g(y+j/3-1)*2)>0)n+=1end
+if(n<2or n>3)s(x,y,0)
+if(n==3)s(x,y,1)end
 goto _
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
