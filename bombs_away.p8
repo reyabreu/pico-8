@@ -1,6 +1,8 @@
 pico-8 cartridge // http://www.pico-8.com
-version 23
+version 27
 __lua__
+--annoying cherries
+--by reynaldo
 function create_player(x,y)
 	local player={
 		x=x,y=y,
