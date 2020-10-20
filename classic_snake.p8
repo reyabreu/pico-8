@@ -1,7 +1,9 @@
 pico-8 cartridge // http://www.pico-8.com
-version 26
+version 27
 __lua__
 --classic snake	
+--by reynaldo
+
 function _init()
 	game_over=false
 	score=0

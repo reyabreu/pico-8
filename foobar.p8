@@ -1,7 +1,8 @@
 pico-8 cartridge // http://www.pico-8.com
-version 20
+version 27
 __lua__
 --library of graphic utils
+--by reynaldo
 text={
 	"a quick",
 	"brown fox",

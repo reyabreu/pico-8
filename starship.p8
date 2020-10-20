@@ -1,6 +1,9 @@
 pico-8 cartridge // http://www.pico-8.com
-version 23
+version 27
 __lua__
+--starship
+--by reynaldo
+
 function rndb(lo,hi)
 	return flr(rnd(hi-lo+1)+lo)	
 end
