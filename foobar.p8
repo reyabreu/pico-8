@@ -82,10 +82,10 @@ end
 function print_outline(txt,x,y,col,bg)
 	col=col or 7 --white
 	bg=bg or 5 --light gray
- for i=-1,1 do
- 	for j=-1,1 do
-  	print(txt,x+j,y+i,bg)
-  end
+ 	for i=-1,1 do
+		for j=-1,1 do
+			print(txt,x+j,y+i,bg)
+		end
 	end
 	print(txt,x,y,col)
 end
@@ -121,9 +121,9 @@ function outline_spr(n,x,y,w,h,flip_x,flip_y)
 		pal(i,0)
 	end
 	for xoffset=-1,1 do
- 	for yoffset=-1,1 do
-  	spr(n,x+xoffset,y+yoffset,w,h,flip_x,flip_y)
-  end
+		for yoffset=-1,1 do
+			spr(n,x+xoffset,y+yoffset,w,h,flip_x,flip_y)
+		end
 	end
 	pal()
 	spr(n,x,y,w,h,flip_x,flip_y)

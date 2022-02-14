@@ -1,3 +1,4 @@
 {
-    "pico8.executablePath": "/mnt/d/dev/gamedev/PICO-8/pico8.exe"
+    "pico8.executablePath": "/mnt/d/dev/gamedev/PICO-8/pico8.exe",
+    "editor.tabSize": 2
 }
