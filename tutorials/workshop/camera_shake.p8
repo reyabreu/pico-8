@@ -14,7 +14,8 @@ end
 function _draw()
 	cls()
 	map()
-	--camera(camx,camy)
+	camera(camx,camy)
+	shake_it()
 end
 -->8
 function boom(amt)

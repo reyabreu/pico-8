@@ -3,6 +3,8 @@ version 27
 __lua__
 --dodge the picr88ps
 --by reynaldo
+left,right,up,down,fire1,fire2=0,1,2,3,4,5
+black,dark_blue,dark_purple,dark_green,brown,dark_gray,light_gray,white,red,orange,yellow,green,blue,indigo,pink,peach=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
 
 function _init()
 	player=make_player(64-2*8,64-2*8)
@@ -52,15 +54,15 @@ function make_player(x,y)
 			end
 	
 			local dx,dy=0,0
-			if (btn(➡️)) dx= 1
-			if (btn(⬅️)) dx=-1
-			if (btn(⬆️)) dy=-1 
-			if (btn(⬇️)) dy= 1 
+			if (btn(right)) dx= 1
+			if (btn(left)) dx=-1
+			if (btn(up)) dy=-1 
+			if (btn(down)) dy= 1 
 			
 			if dx~=0 or dy~=0 then
-			 --flip sprite
-			 p.flipx=dx<0
-			 p.flipy=dy>0
+				--flip sprite
+			 	p.flipx=dx<0
+			 	p.flipy=dy>0
 				
 				--animation timer
 				p.timer+=1
@@ -87,12 +89,13 @@ function make_player(x,y)
 	player.draw=function(p)
 			set_player_pal()
 			for s in all(shadows) do
-    local fw,fh=s.w*8,s.h*8
+    		local fw,fh=s.w*8,s.h*8
 				local sw,sh=fw*s.scale,fh*s.scale
 				sspr(s.si*8,0,fw,fh,s.x+(fw-sw)/2,s.y+(fh-sh)/2,sw,sh,s.flipx,s.flipy)
 			end			
 			outline_spr(p.si,p.x-1,p.y,p.w,p.h,p.flipx,p.flipy)
-			circ(p.hbx,p.hby,p.hbr,9)
+			--draw hitbox boundaries
+			circ(p.hbx,p.hby,p.hbr,yellow)
 	end
 	
 	return player
@@ -130,7 +133,10 @@ function make_enemy(x,y)
 		timer=0,		
 	}
 	enemy.update=function(e)
-		
+		for e in all(enemies) do
+			if (e.x>128 or e.y>128) del(enemies, e)
+			if ()
+		end
 	end
 	enemy.draw=function(e)
 		
