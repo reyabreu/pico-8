@@ -35,11 +35,11 @@ function _init()
 end
 
 function _update()
- man:update()
-  if mget(man.x,man.y)==10 then
-	  mset(man.x,man.y,26)
-	  sfx(0)
-  end
+ 	man:update()
+	if mget(man.x,man.y)==10 then
+		mset(man.x,man.y,26)
+		sfx(0)
+	end
 end
 
 function _draw()

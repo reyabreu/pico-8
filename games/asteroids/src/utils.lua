@@ -1,4 +1,6 @@
 -- general utility routines
+pi=3.141527
+
 function rndb(low,high)
   return flr(rnd(high-low+1)+low)
 end
@@ -32,4 +34,12 @@ function outline_spr(n,x,y,w,h,flip_x,flip_y)
 	end
 	pal()
 	spr(n,x,y,w,h,flip_x,flip_y)
+end
+
+function oscillate(from,to,duration,phase)
+	phase=phase==nil and 0 or phase
+	local tau=pi*2
+	local dis=(to-from)/2
+	duration/=120
+	return from+dis+sin((t()/100+to*tau)/duration-phase/360)*dis
 end
