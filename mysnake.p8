@@ -18,17 +18,23 @@ function _init()
 	local segment={}
 	for i=1,5 do
 		s={
-			x=snake.ssz*i,
+			x=snake.ssz*i-1,
 			y=60
 		}
 		add(snake.body,s)
 	end
+	game_over=false
 end
 
 function _update()
 	-- animation timer
 	timer+=1
 	if (timer>200) timer=0
+
+	if game_over then
+		if (btnp(❎)) _init()
+		return
+	end
 
 	-- add fruit
 	if #fruits==0 then
@@ -43,8 +49,8 @@ function _update()
 	if (btnp(⬇️)) sdir=sdir<2 and 3 or sdir
 
 	-- animate snake
-	if (btn(❎)) or (sdir!=snake.sdir) then
-	--if (timer%3==0) or (sdir!=snake.sdir) then
+	--if (btn(❎)) or (sdir!=snake.sdir) then
+	if (timer%3==0) or (sdir!=snake.sdir) then
 		snake.sdir=sdir
 		local dx,dy=0,0
 		if (sdir==0) dx=-1
@@ -63,7 +69,8 @@ end
 
 function _draw()
 	-- background
-	cls(5)
+	cls()
+	rectfill(0,1,126,127,5)
 
 	-- fruit
 	for f in all(fruits) do
@@ -76,19 +83,41 @@ function _draw()
 		rectfill(seg.x-msz+1,seg.y-msz+1,seg.x+msz-1,seg.y+msz-1,snake.col)
 	end
 	local h=snake.body[#snake.body]
-	rectfill(h.x-msz+1,h.y-msz+1,h.x+msz-1,h.y+msz-1,4)
-	--pset(h.x,h.y,7)
+	--rectfill(h.x-msz+1,h.y-msz+1,h.x+msz-1,h.y+msz-1,4)
+	pset(h.x,h.y,7)
 	
-	rect(2,2,125,125,12)
+	rect(0,1,126,127,12)
+
+	if game_over then
+		local str="game over! press ❎ to retry"
+		print(str, 64 - 2*#str, 60, 7)
+	end
 	
 	-- stats
-	print("body sz:"..#snake.body)
-	print("head.x:"..snake.body[#snake.body].x)
+	--print("body sz:"..#snake.body)
+	--print("head.x:"..snake.body[#snake.body].x)
 end
 
 function check_hit()
 	local h=snake.body[#snake.body]
 	local msz=snake.ssz/2
+
+	local s
+	if h.x-msz<=0 or h.x+msz>=126 or h.y-msz<=1 or h.y+msz>=127 then
+		game_over=true
+		sfx(1)
+	end
+	if not game_over then
+		for i=1,#snake.body-1 do
+			s=snake.body[i]
+			if h.x>=s.x-msz and h.x<=s.x+msz and h.y>=s.y-msz and h.y<=s.y+msz then
+				game_over=true
+				sfx(1)
+				break
+			end
+		end
+	end
+
 	for f in all(fruits) do
 		if f[1]>=h.x-msz and f[1]<=h.x+msz and f[2]>=h.y-msz and f[2]<=h.y+msz then
 			del(fruits,f)
@@ -101,6 +130,7 @@ function check_hit()
 			sfx(0)
 		end
 	end
+
 end
 -->8
 --fruit
@@ -109,8 +139,8 @@ function drop_fruit()
 	local msz=snake.ssz/2
 	local fx,fy
 	while not is_valid do
-		fx=5+flr(rnd(100))
-		fy=5+flr(rnd(100))
+		fx=2+flr(rnd(120))
+		fy=1+flr(rnd(120))
 		if pget(fx,fy)!=snake.col then
 			is_valid=true
 			for s in all(snake.body) do
@@ -132,3 +162,9 @@ __gfx__
 00700700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __sfx__
 00010000237502473026720280502a050300303301032000300102e7302d700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0010000000000285402144027540154401a530084300b520000000155001550015400151001500015000150000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00100000270402e0502903016720187401375022050270202d0402905016750197201574018050260302c020000001a2000000000000000001230000000000000000000000000000000000000000000000000000
+000500000f3500f3500f3500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+__music__
+02 02034344
+
