@@ -93,9 +93,10 @@ function make_player(x,y)
 				local sw,sh=fw*s.scale,fh*s.scale
 				sspr(s.si*8,0,fw,fh,s.x+(fw-sw)/2,s.y+(fh-sh)/2,sw,sh,s.flipx,s.flipy)
 			end			
-			outline_spr(p.si,p.x-1,p.y,p.w,p.h,p.flipx,p.flipy)
+			--outline_spr(p.si,p.x-1,p.y,p.w,p.h,p.flipx,p.flipy)
+			spr(p.si,p.x-1,p.y,p.w,p.h,p.flipx,p.flipy)
 			--draw hitbox boundaries
-			circ(p.hbx,p.hby,p.hbr,yellow)
+			--circ(p.hbx,p.hby,p.hbr,yellow)
 	end
 	
 	return player
@@ -135,7 +136,6 @@ function make_enemy(x,y)
 	enemy.update=function(e)
 		for e in all(enemies) do
 			if (e.x>128 or e.y>128) del(enemies, e)
-			if ()
 		end
 	end
 	enemy.draw=function(e)
@@ -163,9 +163,9 @@ function outline_spr(n,x,y,w,h,flip_x,flip_y)
 		pal(i,0)
 	end
 	for xoffset=-1,1 do
- 	for yoffset=-1,1 do
-  	spr(n,x+xoffset,y+yoffset,w,h,flip_x,flip_y)
-  end
+		for yoffset=-1,1 do
+			spr(n,x+xoffset,y+yoffset,w,h,flip_x,flip_y)
+		end
 	end
 	set_player_pal()
  spr(n,x,y,w,h,flip_x,flip_y)

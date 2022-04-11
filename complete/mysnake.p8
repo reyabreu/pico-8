@@ -2,10 +2,12 @@ pico-8 cartridge // http://www.pico-8.com
 version 35
 __lua__
 snake={}
-timer=0
 fruits={}
 
 function _init()
+	delta=10
+	timer=delta
+
 	-- make snake
 	snake={
 		col=11,  -- colour
@@ -26,10 +28,9 @@ function _init()
 	game_over=false
 end
 
-function _update()
+function _update60()
 	-- animation timer
-	timer+=1
-	if (timer>200) timer=0
+	timer-=1
 
 	if game_over then
 		if (btnp(❎)) _init()
@@ -38,7 +39,7 @@ function _update()
 
 	-- add fruit
 	if #fruits==0 then
-		drop_fruit()		
+		drop_fruit()
 	end
 
 	--process btn press
@@ -50,7 +51,8 @@ function _update()
 
 	-- animate snake
 	--if (btn(❎)) or (sdir!=snake.sdir) then
-	if (timer%3==0) or (sdir!=snake.sdir) then
+	if (timer<=0) or (sdir!=snake.sdir) then
+		timer=delta
 		snake.sdir=sdir
 		local dx,dy=0,0
 		if (sdir==0) dx=-1
@@ -127,6 +129,7 @@ function check_hit()
 			if (snake.sdir==2) dy=-1
 			if (snake.sdir==3) dy= 1
 			add(snake.body,{x=h.x+dx*(snake.ssz*snake.spd),y=h.y+dy*(snake.ssz*snake.spd)})
+			delta-=1
 			sfx(0)
 		end
 	end
